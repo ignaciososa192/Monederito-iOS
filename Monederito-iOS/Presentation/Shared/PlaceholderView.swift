@@ -8,11 +8,28 @@
 import SwiftUI
 
 struct PlaceholderView: View {
+    let title: String
+    let icon: String
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack(spacing: 16) {
+            Image(systemName: icon)
+                .font(.system(size: 60))
+                .foregroundStyle(Color.monederitoOrange)
+
+            Text(title)
+                .font(.title2)
+                .fontWeight(.semibold)
+                .foregroundStyle(.primary)
+
+            Text("Próximamente...")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.monederitoBackground.ignoresSafeArea())
     }
 }
 
 #Preview {
-    PlaceholderView()
+    PlaceholderView(title: "Placeholder", icon: "person.2.fill")
 }
