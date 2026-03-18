@@ -9,13 +9,25 @@ import SwiftUI
 
 // Paleta de colores extraída del PDF (naranja principal, acento púrpura)
 extension Color {
-    // Colores de marca
-    static let monederitoOrange = Color(red: 0.96, green: 0.60, blue: 0.25)
-    static let monederitoPurple = Color(red: 0.47, green: 0.24, blue: 0.80)
-    static let monederitoBackground = Color(red: 0.98, green: 0.94, blue: 0.87)
+    // Colores de marca — consistentes con frontend Monederito
+    static let monederitoOrange     = Color(hex: "#F0853A") // naranja principal
+    static let monederitoPurple     = Color(hex: "#7C3AED") // púrpura acento
+    static let monederitoBackground = Color(hex: "#FAF0E6") // fondo cálido
     
     // Colores semánticos
-    static let riskRed    = Color(red: 0.90, green: 0.23, blue: 0.23)
-    static let safeGreen  = Color(red: 0.22, green: 0.70, blue: 0.44)
-    static let warningAmber = Color(red: 0.95, green: 0.70, blue: 0.10)
+    static let riskRed      = Color(hex: "#E53A3A")
+    static let safeGreen    = Color(hex: "#38B371")
+    static let warningAmber = Color(hex: "#F2B310")
+}
+
+extension Color {
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let r = Double((int >> 16) & 0xFF) / 255
+        let g = Double((int >> 8) & 0xFF) / 255
+        let b = Double(int & 0xFF) / 255
+        self.init(red: r, green: g, blue: b)
+    }
 }
