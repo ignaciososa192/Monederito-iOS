@@ -53,4 +53,13 @@ struct MockData {
         Transaction(userID: beneficiaryUser.id, amount: 2100, category: .food, merchant: "Rappi"),
         Transaction(userID: beneficiaryUser.id, amount: 1200, category: .transport, merchant: "Uber"),
     ]
+
+    static let spendingByCategory: [TransactionCategory: Double] = [
+        .food:          8500,
+        .transport:     3200,
+        .entertainment: 4800,
+        .education:     2100,
+        .gambling:      15000,  // ← bajalo para ver el chart balanceado
+        .services:      1500
+    ]
 }

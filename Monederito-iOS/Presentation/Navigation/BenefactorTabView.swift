@@ -27,9 +27,7 @@ struct BenefactorTabView: View {
             
             // Tab 1 — Dashboard
             NavigationStack {
-                PlaceholderView(title: "Dashboard", icon: "chart.pie.fill")
-                    .navigationTitle("Monederito")
-                    .navigationBarTitleDisplayMode(.large)
+                DashboardView()
             }
             .tabItem {
                 Label("Inicio", systemImage: "house.fill")
