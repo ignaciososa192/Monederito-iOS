@@ -62,4 +62,26 @@ struct MockData {
         .gambling:      15000,  // ← bajalo para ver el chart balanceado
         .services:      1500
     ]
+
+    static let savingsGoals: [SavingsGoal] = [
+        SavingsGoal(
+            title: "Zapatillas Nike",
+            targetAmount: 35000,
+            currentAmount: 12000,
+            emoji: "👟"
+        ),
+        SavingsGoal(
+            title: "Auriculares",
+            targetAmount: 50000,
+            currentAmount: 50000,
+            emoji: "🎧",
+            isCompleted: true
+        ),
+        SavingsGoal(
+            title: "Viaje con amigos",
+            targetAmount: 150000,
+            currentAmount: 8000,
+            emoji: "✈️"
+        )
+    ]
 }

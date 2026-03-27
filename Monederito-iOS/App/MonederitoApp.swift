@@ -15,6 +15,10 @@ struct MonederitoApp: App {
     // Al inyectarlo con .environment(), todas las Views hijas pueden accederlo.
     @State private var appState = AppState()
     
+    // El container decide qué repositorios utilizar
+    // Cambiá .mock por .supabase cuando conectemos el backend
+    private let container = DependencyContainer.mock
+    
     var body: some Scene {
         WindowGroup {
             RootView()
@@ -22,6 +26,7 @@ struct MonederitoApp: App {
                 // Cualquier View descendiente puede hacer @Environment(AppState.self)
                 // para acceder a este mismo objeto.
                 .environment(appState)
+                .environment(container)
         }
     }
 }

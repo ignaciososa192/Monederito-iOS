@@ -10,6 +10,7 @@ import SwiftUI
 struct DashboardView: View {
     
     @Environment(AppState.self) private var appState
+    @Environment(DependencyContainer.self) private var container
     
     // CONCEPTO: @State con clase @Observable
     // El ViewModel vive aquí y SwiftUI lo observa automáticamente.
@@ -58,7 +59,11 @@ struct DashboardView: View {
         // Es el reemplazo moderno de onAppear para código asíncrono.
         .task {
             if let userID = appState.currentUser?.id {
-                await viewModel.loadDashboard(for: userID)
+                await viewModel.loadDashboard(
+                    for: userID,
+                    transactionRepo: container.transactionRepository,
+                    userRepo: container.userRepository
+                )
             }
         }
         // Loading overlay
@@ -140,12 +145,20 @@ struct DashboardView: View {
                     alert: alert,
                     onApprove: {
                         Task {
-                            await viewModel.resolveAlert(alert, status: .approved)
+                            await viewModel.resolveAlert(
+                                alert,
+                                status: .approved,
+                                using: container.transactionRepository
+                            )
                         }
                     },
                     onDeny: {
                         Task {
-                            await viewModel.resolveAlert(alert, status: .denied)
+                            await viewModel.resolveAlert(
+                                alert,
+                                status: .denied,
+                                using: container.transactionRepository
+                            )
                         }
                     }
                 )

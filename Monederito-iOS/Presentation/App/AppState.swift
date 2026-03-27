@@ -7,10 +7,6 @@
 
 import SwiftUI
 
-// CONCEPTO: @Observable — macro de Swift 5.9+
-// Convierte automáticamente las propiedades en observables.
-// Las Views que lean estas propiedades se re-renderizan cuando cambian.
-
 @Observable
 class AppState {
     
@@ -18,20 +14,42 @@ class AppState {
     var currentUser: User? = nil
     var isAuthenticated: Bool = false
     var isLoading: Bool = false
+    var error: AppError? = nil
     
-    // CONCEPTO: propiedad computada que deriva del estado existente
-    // No almacena nada nuevo, solo interpreta lo que ya hay.
-    var userRole: UserRole? {
-        currentUser?.role
+    // MARK: - Computed
+    var userRole: UserRole? { currentUser?.role }
+    var isBenefactor: Bool { userRole == .benefactor }
+    
+    // MARK: - Auth con repositorio real
+    // CONCEPTO: el AppState ahora recibe el repositorio
+    // en lugar de usar MockData directamente
+    
+    func signIn(email: String, password: String, using repository: any AuthRepositoryProtocol) async {
+        isLoading = true
+        error = nil
+        
+        do {
+            let user = try await repository.signIn(email: email, password: password)
+            currentUser = user
+            isAuthenticated = true
+        } catch let appError as AppError {
+            error = appError
+        } catch {
+            self.error = AppError.serverError(code: 0, message: error.localizedDescription)
+        }
+        
+        isLoading = false
     }
     
-    var isBenefactor: Bool {
-        userRole == .benefactor
+    func signOut(using repository: any AuthRepositoryProtocol) async {
+        do {
+            try await repository.signOut()
+        } catch { }
+        currentUser = nil
+        isAuthenticated = false
     }
     
-    // MARK: - Mock login para desarrollo
-    // Esto lo reemplazaremos en el Paso 3 con auth real de Supabase
-    
+    // MARK: - Quick login para desarrollo (lo eliminamos en Paso 7)
     func loginAsBenefactor() {
         currentUser = MockData.benefactorUser
         isAuthenticated = true

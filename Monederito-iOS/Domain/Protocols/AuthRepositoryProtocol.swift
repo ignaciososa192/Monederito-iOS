@@ -16,9 +16,24 @@ import Foundation
 // - async: no bloquea el hilo principal mientras espera la red
 // - throws: puede lanzar un error que debés capturar con try/catch
 
-protocol AuthRepositoryProtocol {
+protocol AuthRepositoryProtocol: AnyObject {
+    
+    // CONCEPTO: async throws
+    // - async: no bloquea el hilo principal
+    // - throws: puede lanzar un AppError
+    // El caller debe usar: try await
+    
     func signIn(email: String, password: String) async throws -> User
-    func signUp(email: String, password: String, fullName: String, role: UserRole) async throws -> User
+    func signUp(
+        email: String,
+        password: String,
+        fullName: String,
+        role: UserRole,
+        phone: String
+    ) async throws -> User
     func signOut() async throws
     func getCurrentUser() async throws -> User?
+    func resetPassword(email: String) async throws
+    func updateProfile(_ user: User) async throws -> User
+    func enableBiometrics() async throws
 }
