@@ -46,8 +46,7 @@ struct BenefactorTabView: View {
             
             // Tab 3 — Beneficiarios
             NavigationStack {
-                PlaceholderView(title: "Mis Beneficiarios", icon: "person.2.fill")
-                    .navigationTitle("Beneficiarios")
+                ParentalControlView()
             }
             .tabItem {
                 Label("Familia", systemImage: "person.2.fill")
