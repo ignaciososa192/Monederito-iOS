@@ -23,6 +23,7 @@ final class DependencyContainer {
     let authRepository: any AuthRepositoryProtocol
     let transactionRepository: any TransactionRepositoryProtocol
     let userRepository: any UserRepositoryProtocol
+    let operationsRepository: any OperationsRepositoryProtocol
     
     // MARK: - Singleton para desarrollo
     static let mock = DependencyContainer(environment: .mock)
@@ -39,6 +40,7 @@ final class DependencyContainer {
             self.authRepository = MockAuthRepository()
             self.transactionRepository = MockTransactionRepository()
             self.userRepository = MockUserRepository()
+            self.operationsRepository = MockOperationsRepository()
             
         case .supabase:
             // En el Paso 13 reemplazamos por:
@@ -49,6 +51,7 @@ final class DependencyContainer {
             self.authRepository = MockAuthRepository()
             self.transactionRepository = MockTransactionRepository()
             self.userRepository = MockUserRepository()
+            self.operationsRepository = MockOperationsRepository()
         }
     }
 }

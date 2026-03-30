@@ -19,8 +19,7 @@ struct BeneficiaryTabView: View {
         TabView(selection: $selectedTab) {
             
             NavigationStack {
-                PlaceholderView(title: "Mi Billetera", icon: "wallet.pass.fill")
-                    .navigationTitle("Mi Billetera")
+                BeneficiaryDashboardView()
             }
             .tabItem {
                 Label("Billetera", systemImage: "wallet.pass.fill")

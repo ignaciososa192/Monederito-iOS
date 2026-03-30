@@ -84,4 +84,11 @@ struct MockData {
             emoji: "✈️"
         )
     ]
+
+    static let qrMerchant = QRMerchantData(
+        merchantID: "merchant-001",
+        merchantName: "Farmacia Del Pueblo",
+        category: .health,
+        defaultAmount: nil
+    )
 }
