@@ -45,8 +45,14 @@ struct BeneficiaryTabView: View {
             .tag(BeneficiaryTab.savings)
             
             NavigationStack {
-                PlaceholderView(title: "Aprender", icon: "book.fill")
-                    .navigationTitle("Educación")
+                // CONCEPTO: Inyectamos el VM con el Repositorio Mock y la Estrategia
+                EducationView(viewModel: EducationViewModel(
+                    educationRepository: MockEducationRepository(),
+                    educationBlockingStrategy: EducationBlockingStrategy(
+                        educationRepository: MockEducationRepository()
+                    ),
+                    userId: UUID() // En el Paso 13 esto vendrá del Auth real
+                ))
             }
             .tabItem {
                 Label("Aprender", systemImage: "book.fill")

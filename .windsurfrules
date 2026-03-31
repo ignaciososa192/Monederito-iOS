@@ -1,0 +1,29 @@
+# Monederito iOS Development Rules
+You are an expert iOS Engineer. We are building 'Monederito', a family-focused Fintech app.
+
+## Tech Stack & Architecture
+- Language: Swift 6 (Strict Concurrency).
+- UI Framework: SwiftUI (NavigationStack).
+- Architecture: MVVM + Repository Pattern.
+- Dependency Injection: Manual injection via Initializers (avoid Singletons where possible).
+- Business Logic: Strategy Pattern for payment/blocking logic.
+- Data Layer: Combine/Async-Await for Repository protocols.
+- Dependencies: Swift Package Manager (SPM).
+
+## Code Style Rules
+- Use 'final class' for ViewModels and Repositories.
+- Use 'struct' for Models and Views.
+- ViewModels must not import SwiftUI (use Foundation/Combine).
+- All strings must use String Catalog (Localization).
+- Implement 'PreviewContainer' for SwiftUI Previews with Mock Data.
+
+## Core Feature Focus: Problematic Payment Blocking
+- Logic must allow a 'Benefactor' (Elena/Pedro) to intercept or pre-approve transactions.
+- Use Strategy Pattern to define 'RiskCategories' (Gambling, In-app purchases, etc.).
+
+# Architecture & Development Rules
+- Follow the roadmap in `@ROADMAP.md`. Always check status before proposing code.
+- **Architecture**: MVVM. ViewModels must be `final class` and use `@Published` (Combine) or `@Observable` (SwiftUI 5.0+).
+- **Design Pattern**: Use 'Strategy' for payment blocking logic as defined in the UX Research.
+- **Naming**: Use 'Elena' context for Parent/Benefactor flows and 'Pedro' for Guardian flows.
+- **Efficiency**: Since tokens are limited, provide modular code. Do not rewrite entire files unless requested. Suggest incremental changes.
