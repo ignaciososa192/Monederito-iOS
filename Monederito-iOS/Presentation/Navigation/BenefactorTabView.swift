@@ -55,8 +55,7 @@ struct BenefactorTabView: View {
             
             // Tab 4 — Configuración
             NavigationStack {
-                PlaceholderView(title: "Configuración", icon: "gearshape.fill")
-                    .navigationTitle("Configuración")
+                SettingsView()
             }
             .tabItem {
                 Label("Config", systemImage: "gearshape.fill")
