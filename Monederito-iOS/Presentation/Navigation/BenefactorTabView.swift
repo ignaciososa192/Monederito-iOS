@@ -36,12 +36,12 @@ struct BenefactorTabView: View {
             
             // Tab 2 — Alertas (funcionalidad principal del PDF)
             NavigationStack {
-                PlaceholderView(title: "Alertas de Riesgo", icon: "bell.badge.fill")
-                    .navigationTitle("Alertas")
+                AlertsView()
             }
             .tabItem {
                 Label("Alertas", systemImage: "bell.badge.fill")
             }
+            .badge(/* pendingCount */ 0) // En Paso 12 conectamos el badge real
             .tag(BenefactorTab.alerts)
             
             // Tab 3 — Beneficiarios

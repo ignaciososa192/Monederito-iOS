@@ -91,4 +91,43 @@ struct MockData {
         category: .health,
         defaultAmount: nil
     )
+
+    static let alertHistory: [RiskAlert] = [
+        RiskAlert(
+            transactionID: UUID(),
+            beneficiaryID: beneficiaryUser.id,
+            benefactorID: benefactorUser.id,
+            amount: 15000,
+            merchant: "BetAR Online",
+            category: .gambling,
+            createdAt: Calendar.current.date(byAdding: .day, value: -2, to: Date()) ?? Date(),
+            status: .denied,
+            resolvedAt: Calendar.current.date(byAdding: .day, value: -2, to: Date()),
+            educationalTip: "Las apuestas tienen una tasa de pérdida del 97%."
+        ),
+        RiskAlert(
+            transactionID: UUID(),
+            beneficiaryID: beneficiaryUser.id,
+            benefactorID: benefactorUser.id,
+            amount: 50000,
+            merchant: "CryptoFast",
+            category: .highRiskInvest,
+            createdAt: Calendar.current.date(byAdding: .day, value: -5, to: Date()) ?? Date(),
+            status: .approved,
+            resolvedAt: Calendar.current.date(byAdding: .day, value: -5, to: Date()),
+            educationalTip: "Las inversiones de alto riesgo pueden generar grandes pérdidas."
+        ),
+        RiskAlert(
+            transactionID: UUID(),
+            beneficiaryID: beneficiaryUser.id,
+            benefactorID: benefactorUser.id,
+            amount: 8000,
+            merchant: "Casino Virtual",
+            category: .gambling,
+            createdAt: Calendar.current.date(byAdding: .day, value: -10, to: Date()) ?? Date(),
+            status: .denied,
+            resolvedAt: Calendar.current.date(byAdding: .day, value: -10, to: Date()),
+            educationalTip: "Ese dinero equivale a 10 días de transporte."
+        )
+    ]
 }
