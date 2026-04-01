@@ -46,6 +46,20 @@ struct DashboardView: View {
         .navigationTitle("Monederito")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
+            #if DEBUG
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button {
+                    Task {
+                        await NotificationManager.shared.sendTestRichNotification()
+                    }
+                } label: {
+                    Image(systemName: "bell.fill")
+                        .foregroundStyle(.red)
+                        .font(.caption)
+                }
+            }
+            #endif
+            
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
                     appState.signOut()

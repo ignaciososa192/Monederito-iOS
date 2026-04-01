@@ -6,8 +6,15 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		9367663E2F7D800300FC75CC /* ROADMAP.md in Resources */ = {isa = PBXBuildFile; fileRef = 9367663C2F7D800300FC75CC /* ROADMAP.md */; };
+		936766402F7D802000FC75CC /* Proyecto DiseñoUX. Monederito. A Guada Gutierrez.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 9367663F2F7D802000FC75CC /* Proyecto DiseñoUX. Monederito. A Guada Gutierrez.pdf */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		934CFCAE2F5B8A2B006048BA /* Monederito-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Monederito-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9367663C2F7D800300FC75CC /* ROADMAP.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ROADMAP.md; sourceTree = "<group>"; };
+		9367663F2F7D802000FC75CC /* Proyecto DiseñoUX. Monederito. A Guada Gutierrez.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Proyecto DiseñoUX. Monederito. A Guada Gutierrez.pdf"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -34,6 +41,7 @@
 			children = (
 				934CFCB02F5B8A2B006048BA /* Monederito-iOS */,
 				934CFCAF2F5B8A2B006048BA /* Products */,
+				9367663D2F7D800300FC75CC /* docs */,
 			);
 			sourceTree = "<group>";
 		};
@@ -43,6 +51,15 @@
 				934CFCAE2F5B8A2B006048BA /* Monederito-iOS.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		9367663D2F7D800300FC75CC /* docs */ = {
+			isa = PBXGroup;
+			children = (
+				9367663F2F7D802000FC75CC /* Proyecto DiseñoUX. Monederito. A Guada Gutierrez.pdf */,
+				9367663C2F7D800300FC75CC /* ROADMAP.md */,
+			);
+			path = docs;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -109,6 +126,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				936766402F7D802000FC75CC /* Proyecto DiseñoUX. Monederito. A Guada Gutierrez.pdf in Resources */,
+				9367663E2F7D800300FC75CC /* ROADMAP.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

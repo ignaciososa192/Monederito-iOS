@@ -46,7 +46,27 @@ struct AlertsView: View {
                     for: userID,
                     using: container.transactionRepository
                 )
+                
+                // Handle deep link navigation
+                if let pendingAlertID = appState.pendingAlertID {
+                    // Find the alert in loaded data
+                    if let alert = viewModel.allAlerts.first(where: { $0.id == pendingAlertID }) {
+                        selectedAlert = alert
+                    }
+                    // Clear the pending alert ID even if not found
+                    appState.pendingAlertID = nil
+                }
             }
+        }
+        .onChange(of: appState.pendingAlertID) { _, pendingAlertID in
+            guard let pendingAlertID = pendingAlertID else { return }
+            
+            // Find the alert in loaded data
+            if let alert = viewModel.allAlerts.first(where: { $0.id == pendingAlertID }) {
+                selectedAlert = alert
+            }
+            // Clear the pending alert ID even if not found
+            appState.pendingAlertID = nil
         }
         .sheet(item: $selectedAlert) { alert in
             AlertDetailView(

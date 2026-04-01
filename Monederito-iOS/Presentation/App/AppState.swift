@@ -15,6 +15,8 @@ class AppState {
     var isAuthenticated: Bool = false
     var isLoading: Bool = false
     var error: AppError? = nil
+    var selectedTab: BenefactorTab = .dashboard
+    var pendingAlertID: UUID? = nil
     
     // MARK: - Computed
     var userRole: UserRole? { currentUser?.role }

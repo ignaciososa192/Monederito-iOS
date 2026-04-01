@@ -7,19 +7,19 @@
 
 import SwiftUI
 
+enum BenefactorTab: String {
+    case dashboard, alerts, beneficiaries, settings
+}
+
 struct BenefactorTabView: View {
     
-    // CONCEPTO: @State — propiedad local de la View.
-    // Cuando cambia, SwiftUI re-renderiza la View automáticamente.
-    // Es "propiedad de la View", no del ViewModel.
-    @State private var selectedTab: BenefactorTab = .dashboard
-    
-    enum BenefactorTab {
-        case dashboard, alerts, beneficiaries, settings
-    }
+    @Environment(AppState.self) private var appState
     
     var body: some View {
-        TabView(selection: $selectedTab) {
+        TabView(selection: Binding(
+            get: { appState.selectedTab },
+            set: { appState.selectedTab = $0 }
+        )) {
             
             // CONCEPTO: NavigationStack moderno (iOS 16+)
             // Reemplaza al viejo NavigationView.
