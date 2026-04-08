@@ -15,8 +15,10 @@ class AppState {
     var isAuthenticated: Bool = false
     var isLoading: Bool = false
     var error: AppError? = nil
-    var selectedTab: BenefactorTab = .dashboard
+    var selectedBenefactorTab: BenefactorTab = .dashboard
+    var selectedBeneficiaryTab: BeneficiaryTab = .wallet
     var pendingAlertID: UUID? = nil
+    var pendingOperation: OperationsMainView.OperationType? = nil
     
     // MARK: - Computed
     var userRole: UserRole? { currentUser?.role }

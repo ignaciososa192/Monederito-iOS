@@ -23,6 +23,9 @@ struct BeneficiaryDashboardView: View {
                         .padding(.horizontal)
                 }
                 
+                // Quick Actions - Navigation to Operations
+                quickActionsSection
+                
                 // Resumen del mes
                 if let summary = viewModel.summary {
                     summarySection(summary)
@@ -58,6 +61,37 @@ struct BeneficiaryDashboardView: View {
                 }
             }
         }
+    }
+    
+    @ViewBuilder
+    private var quickActionsSection: some View {
+        QuickActionsView(
+            onQR: {
+                // Navigate to Operations tab with QR selected
+                navigateToOperation(.qr)
+            },
+            onTransfer: {
+                // Navigate to Operations tab with Transfer selected
+                navigateToOperation(.transfer)
+            },
+            onPhoneRecharge: {
+                // Navigate to Operations tab with Phone Recharge selected
+                navigateToOperation(.phoneRecharge)
+            },
+            onSUBE: {
+                // Navigate to Operations tab with SUBE Recharge selected
+                navigateToOperation(.subeRecharge)
+            },
+            onServices: {
+                // Navigate to Operations tab with Services selected
+                navigateToOperation(.services)
+            }
+        )
+    }
+    
+    private func navigateToOperation(_ operation: OperationsMainView.OperationType) {
+        appState.pendingOperation = operation
+        appState.selectedBeneficiaryTab = .operations
     }
     
     // MARK: - Subviews

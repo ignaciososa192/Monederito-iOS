@@ -35,6 +35,9 @@ struct DashboardView: View {
                 )
                 .padding(.horizontal)
                 
+                // MARK: - Quick Actions for Benefactor
+                quickActionsSection
+                
                 // MARK: - Beneficiarios
                 if !viewModel.beneficiaryAccounts.isEmpty {
                     beneficiariesSection
@@ -179,6 +182,37 @@ struct DashboardView: View {
                 .padding(.horizontal)
             }
         }
+    }
+    
+    @ViewBuilder
+    private var quickActionsSection: some View {
+        QuickActionsView(
+            onQR: {
+                // Navigate to Operations tab with QR selected
+                navigateToOperation(.qr)
+            },
+            onTransfer: {
+                // Navigate to Operations tab with Transfer selected
+                navigateToOperation(.transfer)
+            },
+            onPhoneRecharge: {
+                // Navigate to Operations tab with Phone Recharge selected
+                navigateToOperation(.phoneRecharge)
+            },
+            onSUBE: {
+                // Navigate to Operations tab with SUBE Recharge selected
+                navigateToOperation(.subeRecharge)
+            },
+            onServices: {
+                // Navigate to Operations tab with Services selected
+                navigateToOperation(.services)
+            }
+        )
+    }
+    
+    private func navigateToOperation(_ operation: OperationsMainView.OperationType) {
+        appState.pendingOperation = operation
+        appState.selectedBenefactorTab = .operations
     }
     
     @ViewBuilder

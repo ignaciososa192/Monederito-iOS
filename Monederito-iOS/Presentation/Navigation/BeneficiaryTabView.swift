@@ -7,13 +7,15 @@
 
 import SwiftUI
 
+enum BeneficiaryTab {
+    case wallet, operations, activity, savings, education
+}
+
 struct BeneficiaryTabView: View {
     
+    @Environment(AppState.self) private var appState
+    @Environment(DependencyContainer.self) private var container
     @State private var selectedTab: BeneficiaryTab = .wallet
-    
-    enum BeneficiaryTab {
-        case wallet, activity, savings, education
-    }
     
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -25,6 +27,14 @@ struct BeneficiaryTabView: View {
                 Label("Billetera", systemImage: "wallet.pass.fill")
             }
             .tag(BeneficiaryTab.wallet)
+            
+            NavigationStack {
+                OperationsMainView()
+            }
+            .tabItem {
+                Label("Operaciones", systemImage: "arrow.left.arrow.right.circle.fill")
+            }
+            .tag(BeneficiaryTab.operations)
             
             NavigationStack {
                 PlaceholderView(title: "Actividad", icon: "list.bullet.rectangle")
@@ -45,13 +55,12 @@ struct BeneficiaryTabView: View {
             .tag(BeneficiaryTab.savings)
             
             NavigationStack {
-                // CONCEPTO: Inyectamos el VM con el Repositorio Mock y la Estrategia
                 EducationView(viewModel: EducationViewModel(
-                    educationRepository: MockEducationRepository(),
+                    educationRepository: container.educationRepository,
                     educationBlockingStrategy: EducationBlockingStrategy(
-                        educationRepository: MockEducationRepository()
+                        educationRepository: container.educationRepository
                     ),
-                    userId: UUID() // En el Paso 13 esto vendrá del Auth real
+                    userId: appState.currentUser?.id ?? UUID()
                 ))
             }
             .tabItem {
@@ -60,5 +69,9 @@ struct BeneficiaryTabView: View {
             .tag(BeneficiaryTab.education)
         }
         .tint(Color.monederitoPurple)
+        // Deep link desde AppState — sin NotificationCenter
+        .onChange(of: appState.selectedBeneficiaryTab) { _, newTab in
+            selectedTab = newTab
+        }
     }
 }

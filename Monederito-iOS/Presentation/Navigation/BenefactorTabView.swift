@@ -8,7 +8,7 @@
 import SwiftUI
 
 enum BenefactorTab: String {
-    case dashboard, alerts, beneficiaries, settings
+    case dashboard, alerts, beneficiaries, settings, operations
 }
 
 struct BenefactorTabView: View {
@@ -16,9 +16,9 @@ struct BenefactorTabView: View {
     @Environment(AppState.self) private var appState
     
     var body: some View {
-        TabView(selection: Binding(
-            get: { appState.selectedTab },
-            set: { appState.selectedTab = $0 }
+        TabView(selection: Binding<BenefactorTab>(
+            get: { appState.selectedBenefactorTab },
+            set: { (newValue: BenefactorTab) in appState.selectedBenefactorTab = newValue }
         )) {
             
             // CONCEPTO: NavigationStack moderno (iOS 16+)
@@ -53,7 +53,16 @@ struct BenefactorTabView: View {
             }
             .tag(BenefactorTab.beneficiaries)
             
-            // Tab 4 — Configuración
+            // Tab 4 — Operaciones
+            NavigationStack {
+                OperationsMainView()
+            }
+            .tabItem {
+                Label("Operaciones", systemImage: "dollarsign.circle.fill")
+            }
+            .tag(BenefactorTab.operations)
+            
+            // Tab 5 — Configuración
             NavigationStack {
                 SettingsView()
             }
