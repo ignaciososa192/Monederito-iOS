@@ -13,14 +13,7 @@ struct TransferView: View {
     @Environment(DependencyContainer.self) private var container
     @Environment(\.dismiss) private var dismiss
     
-    @State private var viewModel = OperationsViewModel()
-    @State private var inputMethod: InputMethod = .contacts
-    
-    enum InputMethod: String, CaseIterable {
-        case contacts = "Contactos"
-        case cbu      = "CBU / CVU"
-        case alias    = "Alias"
-    }
+    @State private var viewModel = TransferViewModel()
     
     @FocusState private var amountFocused: Bool
     
@@ -30,8 +23,11 @@ struct TransferView: View {
                 Color.monederitoBackground.ignoresSafeArea()
                 
                 // Pantalla de éxito
-                if case .success(let message, let amount) = viewModel.operationState {
-                    OperationSuccessView(message: message, amount: amount) {
+                if case .success(let transaction) = viewModel.transferState {
+                    OperationSuccessView(
+                        message: "Transferencia enviada a \(transaction.merchant)",
+                        amount: transaction.amount
+                    ) {
                         viewModel.reset()
                         dismiss()
                     }
@@ -46,7 +42,7 @@ struct TransferView: View {
                             destinationSection
                             
                             // Error
-                            if case .failure(let error) = viewModel.operationState {
+                            if case .failure(let error) = viewModel.transferState {
                                 errorBanner(error.errorDescription ?? "Error desconocido")
                             }
                             
@@ -110,14 +106,14 @@ struct TransferView: View {
                 .foregroundColor(.black)
             
             // Selector de método
-            Picker("Método", selection: $inputMethod) {
+            Picker("Método", selection: $viewModel.inputMethod) {
                 ForEach(InputMethod.allCases, id: \.self) { method in
                     Text(method.rawValue).tag(method)
                 }
             }
             .pickerStyle(.segmented)
             
-            switch inputMethod {
+            switch viewModel.inputMethod {
             case .contacts:
                 contactsList
             case .cbu:
@@ -138,7 +134,7 @@ struct TransferView: View {
             ForEach(viewModel.recentContacts) { contact in
                 Button {
                     withAnimation {
-                        viewModel.transferDestination = contact
+                        viewModel.selectContact(contact)
                     }
                 } label: {
                     HStack(spacing: 14) {
@@ -208,10 +204,7 @@ struct TransferView: View {
             
             if viewModel.isCBUValid {
                 Button {
-                    viewModel.transferDestination = TransferDestination(
-                        recipientName: "Destinatario",
-                        cbuOrCvu: viewModel.cbuCvuInput
-                    )
+                    viewModel.validateAndSetCBU()
                 } label: {
                     Text("Confirmar destinatario")
                         .font(.subheadline)
@@ -224,12 +217,25 @@ struct TransferView: View {
     
     @ViewBuilder
     private var aliasInput: some View {
-        AuthTextField(
-            title: "Alias (ej: juan.perez.mp)",
-            icon: "at",
-            text: $viewModel.aliasInput,
-            isValid: viewModel.aliasInput.isEmpty ? nil : viewModel.aliasInput.count > 5
-        )
+        VStack(spacing: 12) {
+            AuthTextField(
+                title: "Alias (ej: juan.perez.mp)",
+                icon: "at",
+                text: $viewModel.aliasInput,
+                isValid: viewModel.aliasInput.isEmpty ? nil : viewModel.isAliasValid
+            )
+            
+            if viewModel.isAliasValid {
+                Button {
+                    viewModel.validateAndSetAlias()
+                } label: {
+                    Text("Confirmar destinatario")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(Color.monederitoOrange)
+                }
+            }
+        }
     }
     
     @ViewBuilder
@@ -271,7 +277,7 @@ struct TransferView: View {
                 }
             } label: {
                 HStack {
-                    if case .loading = viewModel.operationState {
+                    if case .loading = viewModel.transferState {
                         ProgressView().tint(.white).scaleEffect(0.8)
                     } else {
                         Image(systemName: "arrow.right.circle.fill")

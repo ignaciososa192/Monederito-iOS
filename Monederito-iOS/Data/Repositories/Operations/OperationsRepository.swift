@@ -37,8 +37,8 @@ final class MockOperationsRepository: OperationsRepositoryProtocol {
         return Transaction(userID: userID, amount: amount, category: .transport, merchant: "SUBE")
     }
     
-    func payService(service: ServiceType, clientNumber: String, userID: UUID) async throws -> Transaction {
+    func payService(service: ServiceType, clientNumber: String, amount: Double, userID: UUID) async throws -> Transaction {
         try await delay()
-        return Transaction(userID: userID, amount: 0, category: .services, merchant: service.rawValue)
+        return Transaction(userID: userID, amount: amount, category: .services, merchant: service.rawValue)
     }
 }

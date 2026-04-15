@@ -13,15 +13,18 @@ struct ServicePaymentView: View {
     @Environment(DependencyContainer.self) private var container
     @Environment(\.dismiss) private var dismiss
     
-    @State private var viewModel = OperationsViewModel()
+    @State private var viewModel = ServicePaymentViewModel()
     
     var body: some View {
         NavigationStack {
             ZStack {
                 Color.monederitoBackground.ignoresSafeArea()
                 
-                if case .success(let message, let amount) = viewModel.operationState {
-                    OperationSuccessView(message: message, amount: amount) {
+                if case .success(let transaction) = viewModel.paymentState {
+                    OperationSuccessView(
+                        message: "\(transaction.merchant) pagado exitosamente",
+                        amount: transaction.amount
+                    ) {
                         viewModel.reset()
                         dismiss()
                     }
@@ -65,9 +68,9 @@ struct ServicePaymentView: View {
                 .foregroundColor(.black)
             
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                ForEach(ServiceType.allCases) { service in
+                ForEach(viewModel.availableServices) { service in
                     Button {
-                        withAnimation { viewModel.selectedService = service }
+                        withAnimation { viewModel.selectService(service) }
                     } label: {
                         VStack(spacing: 10) {
                             Text(service.emoji)
@@ -120,9 +123,9 @@ struct ServicePaymentView: View {
                         .font(.headline)
                         .foregroundColor(.black)
                     
-                    ForEach(service.providers, id: \.self) { provider in
+                    ForEach(viewModel.availableProviders, id: \.self) { provider in
                         Button {
-                            withAnimation { viewModel.selectedProvider = provider }
+                            withAnimation { viewModel.selectProvider(provider) }
                         } label: {
                             HStack {
                                 Text(provider)
@@ -162,8 +165,15 @@ struct ServicePaymentView: View {
                             icon: "number",
                             text: $viewModel.clientNumber,
                             keyboardType: .numberPad,
-                            isValid: viewModel.clientNumber.isEmpty ? nil
-                                : viewModel.clientNumber.count >= 6
+                            isValid: viewModel.clientNumber.isEmpty ? nil : viewModel.isClientNumberValid
+                        )
+                        
+                        AuthTextField(
+                            title: "Monto a pagar",
+                            icon: "dollarsign.circle",
+                            text: $viewModel.paymentAmount,
+                            keyboardType: .decimalPad,
+                            isValid: viewModel.paymentAmount.isEmpty ? nil : viewModel.isPaymentAmountValid
                         )
                         
                         // Escanear código de barras
@@ -182,7 +192,7 @@ struct ServicePaymentView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                         }
                         
-                        if viewModel.clientNumber.count >= 6 {
+                        if viewModel.isPaymentValid {
                             Button {
                                 Task {
                                     await viewModel.payService(
@@ -192,7 +202,7 @@ struct ServicePaymentView: View {
                                 }
                             } label: {
                                 HStack {
-                                    if case .loading = viewModel.operationState {
+                                    if case .loading = viewModel.paymentState {
                                         ProgressView().tint(.white).scaleEffect(0.8)
                                     } else {
                                         Image(systemName: "bolt.fill")

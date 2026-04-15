@@ -13,17 +13,18 @@ struct PhoneRechargeView: View {
     @Environment(DependencyContainer.self) private var container
     @Environment(\.dismiss) private var dismiss
     
-    @State private var viewModel = OperationsViewModel()
-    
-    private let presetAmounts: [Double] = [200, 500, 1000, 2000, 5000]
+    @State private var viewModel = PhoneRechargeViewModel()
     
     var body: some View {
         NavigationStack {
             ZStack {
                 Color.monederitoBackground.ignoresSafeArea()
                 
-                if case .success(let message, let amount) = viewModel.operationState {
-                    OperationSuccessView(message: message, amount: amount) {
+                if case .success(let transaction) = viewModel.rechargeState {
+                    OperationSuccessView(
+                        message: "Recarga de \(transaction.merchant) exitosa",
+                        amount: transaction.amount
+                    ) {
                         viewModel.reset()
                         dismiss()
                     }
@@ -79,8 +80,7 @@ struct PhoneRechargeView: View {
                 icon: "phone.fill",
                 text: $viewModel.phoneNumber,
                 keyboardType: .phonePad,
-                isValid: viewModel.phoneNumber.isEmpty ? nil
-                    : viewModel.phoneNumber.filter { $0.isNumber }.count >= 10
+                isValid: viewModel.phoneNumber.isEmpty ? nil : viewModel.isPhoneNumberValid
             )
             
             // Acceso rápido — mi número
@@ -110,9 +110,9 @@ struct PhoneRechargeView: View {
                 .foregroundColor(.black)
             
             HStack(spacing: 10) {
-                ForEach(PhoneCarrier.allCases) { carrier in
+                ForEach(viewModel.availableCarriers) { carrier in
                     Button {
-                        withAnimation { viewModel.selectedCarrier = carrier }
+                        withAnimation { viewModel.selectCarrier(carrier) }
                     } label: {
                         VStack(spacing: 6) {
                             Text(carrier.logo)
@@ -148,9 +148,9 @@ struct PhoneRechargeView: View {
                 .foregroundColor(.black)
             
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                ForEach(presetAmounts, id: \.self) { amount in
+                ForEach(viewModel.rechargeAmounts, id: \.self) { amount in
                     Button {
-                        withAnimation { viewModel.selectedRechargeAmount = amount }
+                        withAnimation { viewModel.selectAmount(amount) }
                     } label: {
                         Text(formatAmount(amount))
                             .font(.subheadline)
@@ -185,7 +185,7 @@ struct PhoneRechargeView: View {
             }
         } label: {
             HStack {
-                if case .loading = viewModel.operationState {
+                if case .loading = viewModel.rechargeState {
                     ProgressView().tint(.white).scaleEffect(0.8)
                 } else {
                     Image(systemName: "bolt.fill")

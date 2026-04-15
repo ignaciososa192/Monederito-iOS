@@ -12,5 +12,5 @@ protocol OperationsRepositoryProtocol: AnyObject {
     func transfer(to destination: TransferDestination, amount: Double, userID: UUID) async throws -> Transaction
     func rechargePhone(number: String, carrier: PhoneCarrier, amount: Double, userID: UUID) async throws -> Transaction
     func rechargeSUBE(cardNumber: String, amount: Double, userID: UUID) async throws -> Transaction
-    func payService(service: ServiceType, clientNumber: String, userID: UUID) async throws -> Transaction
+    func payService(service: ServiceType, clientNumber: String, amount: Double, userID: UUID) async throws -> Transaction
 }

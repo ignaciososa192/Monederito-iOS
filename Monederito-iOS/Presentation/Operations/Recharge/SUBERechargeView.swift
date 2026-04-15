@@ -13,17 +13,18 @@ struct SUBERechargeView: View {
     @Environment(DependencyContainer.self) private var container
     @Environment(\.dismiss) private var dismiss
     
-    @State private var viewModel = OperationsViewModel()
-    
-    private let presetAmounts: [Double] = [200, 500, 1000, 2000]
+    @State private var viewModel = SUBERechargeViewModel()
     
     var body: some View {
         NavigationStack {
             ZStack {
                 Color.monederitoBackground.ignoresSafeArea()
                 
-                if case .success(let message, let amount) = viewModel.operationState {
-                    OperationSuccessView(message: message, amount: amount) {
+                if case .success(let transaction) = viewModel.rechargeState {
+                    OperationSuccessView(
+                        message: "SUBE recargada exitosamente",
+                        amount: transaction.amount
+                    ) {
                         viewModel.reset()
                         dismiss()
                     }
@@ -87,12 +88,11 @@ struct SUBERechargeView: View {
                 .foregroundColor(.black)
             
             AuthTextField(
-                title: "Número SUBE (11 dígitos)",
+                title: "Número SUBE (16 dígitos)",
                 icon: "creditcard.fill",
                 text: $viewModel.subeCardNumber,
                 keyboardType: .numberPad,
-                isValid: viewModel.subeCardNumber.isEmpty ? nil
-                    : viewModel.subeCardNumber.filter { $0.isNumber }.count == 11
+                isValid: viewModel.subeCardNumber.isEmpty ? nil : viewModel.isSUBECardValid
             )
             
             HStack(spacing: 6) {
@@ -118,9 +118,9 @@ struct SUBERechargeView: View {
                 .foregroundColor(.black)
             
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                ForEach(presetAmounts, id: \.self) { amount in
+                ForEach(viewModel.subeAmounts, id: \.self) { amount in
                     Button {
-                        withAnimation { viewModel.selectedSUBEAmount = amount }
+                        withAnimation { viewModel.selectAmount(amount) }
                     } label: {
                         Text(formatAmount(amount))
                             .font(.subheadline)
@@ -155,7 +155,7 @@ struct SUBERechargeView: View {
             }
         } label: {
             HStack {
-                if case .loading = viewModel.operationState {
+                if case .loading = viewModel.rechargeState {
                     ProgressView().tint(.white).scaleEffect(0.8)
                 } else {
                     Image(systemName: "tram.fill")

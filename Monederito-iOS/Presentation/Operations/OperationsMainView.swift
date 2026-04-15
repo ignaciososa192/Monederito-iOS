@@ -10,8 +10,8 @@ import SwiftUI
 struct OperationsMainView: View {
     
     @Environment(AppState.self) private var appState
-    @State private var viewModel = OperationsViewModel()
     @State private var selectedOperation: OperationType? = nil
+    @State private var recentContacts: [TransferDestination] = []
     
     enum OperationType: Hashable {
         case transfer, phoneRecharge, subeRecharge, services, qr
@@ -60,7 +60,7 @@ struct OperationsMainView: View {
         .navigationTitle("Operaciones")
         .navigationBarTitleDisplayMode(.large)
         .task {
-            viewModel.loadRecentContacts()
+            loadRecentContacts()
             // Si viene un deep link desde el dashboard, navegar directo
             if let pending = appState.pendingOperation {
                 selectedOperation = pending
@@ -140,16 +140,15 @@ struct OperationsMainView: View {
     
     @ViewBuilder
     private var recentContactsSection: some View {
-        if !viewModel.recentContacts.isEmpty {
+        if !recentContacts.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Contactos recientes")
                     .font(.headline)
                     .padding(.horizontal)
                 
                 VStack(spacing: 0) {
-                    ForEach(viewModel.recentContacts) { contact in
+                    ForEach(recentContacts) { contact in
                         Button {
-                            viewModel.transferDestination = contact
                             selectedOperation = .transfer
                         } label: {
                             HStack(spacing: 12) {
@@ -182,7 +181,7 @@ struct OperationsMainView: View {
                         }
                         .buttonStyle(.plain)
                         
-                        if contact.id != viewModel.recentContacts.last?.id {
+                        if contact.id != recentContacts.last?.id {
                             Divider().padding(.horizontal, 16)
                         }
                     }
@@ -193,6 +192,30 @@ struct OperationsMainView: View {
                 .padding(.horizontal)
             }
         }
+    }
+    
+    // MARK: - Private Methods
+    private func loadRecentContacts() {
+        recentContacts = [
+            TransferDestination(
+                recipientName: "Mamá",
+                cbuOrCvu: "0000003100050000000001",
+                alias: "mama.monederito",
+                isMonederitoUser: true
+            ),
+            TransferDestination(
+                recipientName: "Juan Pérez",
+                cbuOrCvu: "0720461088000071507029",
+                alias: "juan.perez.mp",
+                isMonederitoUser: false
+            ),
+            TransferDestination(
+                recipientName: "Sofia García",
+                cbuOrCvu: "0000003100050000000002",
+                alias: "sofi.garcia",
+                isMonederitoUser: true
+            )
+        ]
     }
     
     @ViewBuilder

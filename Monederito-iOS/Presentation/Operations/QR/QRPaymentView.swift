@@ -13,22 +13,22 @@ struct QRPaymentView: View {
     @Environment(DependencyContainer.self) private var container
     @Environment(\.dismiss) private var dismiss
     
-    @State private var viewModel = OperationsViewModel()
-    @State private var simulatedMerchant = MockData.qrMerchant
-    @State private var amount: String = ""
-    @State private var scanned: Bool = false
+    @State private var viewModel = QRPaymentViewModel()
     
     var body: some View {
         NavigationStack {
             ZStack {
                 Color.monederitoBackground.ignoresSafeArea()
                 
-                if case .success(let message, let amountVal) = viewModel.operationState {
-                    OperationSuccessView(message: message, amount: amountVal) {
+                if case .success(let transaction) = viewModel.paymentState {
+                    OperationSuccessView(
+                        message: "Pago a \(transaction.merchant) exitoso",
+                        amount: transaction.amount
+                    ) {
                         viewModel.reset()
                         dismiss()
                     }
-                } else if !scanned {
+                } else if viewModel.scannedMerchantData == nil {
                     scannerSimulation
                 } else {
                     paymentConfirmation
@@ -38,9 +38,12 @@ struct QRPaymentView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button(scanned ? "Atrás" : "Cancelar") {
-                        if scanned { scanned = false }
-                        else { dismiss() }
+                    Button(viewModel.scannedMerchantData == nil ? "Cancelar" : "Atrás") {
+                        if viewModel.scannedMerchantData == nil {
+                            dismiss()
+                        } else {
+                            viewModel.clearMerchantData()
+                        }
                     }
                     .foregroundColor(Color.monederitoOrange)
                 }
@@ -79,7 +82,7 @@ struct QRPaymentView: View {
             
             // Simular escaneo para desarrollo
             Button {
-                withAnimation { scanned = true }
+                viewModel.startScanning()
             } label: {
                 HStack {
                     Image(systemName: "qrcode")
@@ -102,24 +105,26 @@ struct QRPaymentView: View {
             VStack(spacing: 20) {
                 
                 // Info del comercio
-                VStack(spacing: 12) {
-                    Text(simulatedMerchant.category.emoji)
-                        .font(.system(size: 50))
-                    
-                    Text(simulatedMerchant.merchantName)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.black)
-                    
-                    Text(simulatedMerchant.category.rawValue)
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
+                if let merchant = viewModel.scannedMerchantData {
+                    VStack(spacing: 12) {
+                        Text(merchant.category.emoji)
+                            .font(.system(size: 50))
+                        
+                        Text(merchant.merchantName)
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.black)
+                        
+                        Text(merchant.category.rawValue)
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                    }
+                    .padding(20)
+                    .frame(maxWidth: .infinity)
+                    .background(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 3)
                 }
-                .padding(20)
-                .frame(maxWidth: .infinity)
-                .background(.white)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 3)
                 
                 // Monto
                 VStack(spacing: 8) {
@@ -133,7 +138,7 @@ struct QRPaymentView: View {
                             .fontWeight(.bold)
                             .foregroundColor(Color.monederitoOrange)
                         
-                        TextField("0", text: $amount)
+                        TextField("0", text: $viewModel.paymentAmount)
                             .font(.system(size: 48, weight: .bold))
                             .foregroundColor(.black)
                             .keyboardType(.decimalPad)
@@ -149,18 +154,15 @@ struct QRPaymentView: View {
                 
                 // Botón pagar
                 Button {
-                    let amountDouble = Double(amount) ?? 0
                     Task {
-                        viewModel.operationState = .loading
-                        try? await Task.sleep(nanoseconds: 800_000_000)
-                        viewModel.operationState = .success(
-                            message: "Pago a \(simulatedMerchant.merchantName) exitoso",
-                            amount: amountDouble
+                        await viewModel.processQRPayment(
+                            userID: appState.currentUser?.id ?? UUID(),
+                            using: container.operationsRepository
                         )
                     }
                 } label: {
                     HStack {
-                        if case .loading = viewModel.operationState {
+                        if case .loading = viewModel.paymentState {
                             ProgressView().tint(.white).scaleEffect(0.8)
                         } else {
                             Image(systemName: "qrcode")
@@ -170,11 +172,11 @@ struct QRPaymentView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(!amount.isEmpty ? Color.monederitoOrange : Color.gray.opacity(0.3))
+                    .background(viewModel.isPaymentValid ? Color.monederitoOrange : Color.gray.opacity(0.3))
                     .foregroundColor(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 14))
                 }
-                .disabled(amount.isEmpty)
+                .disabled(!viewModel.isPaymentValid)
             }
             .padding(.horizontal, 24)
             .padding(.vertical, 24)

@@ -53,27 +53,21 @@ struct MonederitoApp: App {
 
     private func handleDeepLink(_ deepLink: DeepLink?) {
         guard let deepLink else { return }
+        defer { notificationManager.pendingDeepLink = nil }
 
         switch deepLink {
         case .riskAlert(let alertID):
             appState.selectedBenefactorTab = .alerts
             appState.pendingAlertID = alertID
-            notificationManager.pendingDeepLink = nil
         
         case .transaction:
             appState.selectedBenefactorTab = .dashboard
-            notificationManager.pendingDeepLink = nil
         
         case .settings:
             appState.selectedBenefactorTab = .settings
-            notificationManager.pendingDeepLink = nil
         
         case .beneficiary:
             appState.selectedBenefactorTab = .beneficiaries
-            notificationManager.pendingDeepLink = nil
-        
-        default:
-            notificationManager.pendingDeepLink = nil
         }
     }
 }

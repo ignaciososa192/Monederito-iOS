@@ -26,13 +26,13 @@ Monederito is a family fintech focused on delegated control, risk prevention, tr
 - [x] 11. Settings & Profile (UI built, core security/notification toggles active)
 - [x] 12. Rich push notifications
 
-## Phase 3 — Current Focus (Operations & Navigation Wiring) ⏳
-- [ ] 8. Operations module: QR, transfers, top-ups, services
-  - [ ] Connect existing Operations views to the main app navigation
-  - [ ] Keep each operation isolated in its own ViewModel
-  - [ ] Maintain repository-based contracts
+## Phase 3 — Operations & Navigation Wiring (Completed) 
+- [x] 8. Operations module: QR, transfers, top-ups, services
+  - [x] Connect existing Operations views to the main app navigation
+  - [x] Keep each operation isolated in its own ViewModel
+  - [x] Maintain repository-based contracts
 
-## Phase 4 — UX Tickets & Polish ⏳
+## Phase 4 — UX Tickets & Polish 
 - [ ] TICKET-01: Onboarding as the first screen
 - [ ] TICKET-02: Account type selection flow
 - [ ] TICKET-03: Sign in with Google integration
