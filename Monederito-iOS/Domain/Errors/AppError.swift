@@ -34,6 +34,13 @@ enum AppError: Error, LocalizedError {
     // Errores de operaciones
     case transactionBlocked(reason: String)
     case operationNotAllowed
+    case missingGoogleToken
+    case googleSignInFailed
+    case profileCreationFailed
+    
+    // Errores de seguridad
+    case biometricNotAvailable
+    case authenticationFailed
     
     // CONCEPTO: propiedad del protocolo LocalizedError
     // Nos permite mostrar mensajes legibles al usuario
@@ -68,6 +75,16 @@ enum AppError: Error, LocalizedError {
             return "Operación bloqueada: \(reason)"
         case .operationNotAllowed:
             return "Esta operación no está permitida"
+        case .missingGoogleToken:
+            return "Token de Google no conseguido. Inténtalo de nuevo"
+        case .googleSignInFailed:
+            return "Error al iniciar sesión con Google"
+        case .profileCreationFailed:
+            return "No se pudo crear tu perfil. Contactá a soporte."
+        case .biometricNotAvailable:
+            return "Autenticación biométrica no disponible en este dispositivo"
+        case .authenticationFailed:
+            return "Error en la autenticación. Inténtalo de nuevo"
         }
     }
     

@@ -15,6 +15,7 @@ struct LoginView: View {
     @State private var viewModel = AuthViewModel()
     @State private var showRegister: Bool = false
     @State private var showOnboarding: Bool = false
+    @State private var showGoogleRolePicker: Bool = false
     
     // CONCEPTO: @FocusState con enum
     // Permite controlar qué campo tiene el foco del teclado
@@ -57,6 +58,19 @@ struct LoginView: View {
         }
         .sheet(isPresented: $showRegister) {
             RegisterView()
+        }
+        .sheet(isPresented: $showGoogleRolePicker) {
+            GoogleRoleSelectionView(
+                selectedRole: $viewModel.googleSelectedRole,
+                onConfirm: {
+                    Task {
+                        await viewModel.signInWithGoogle(
+                            using: container.authRepository,
+                            appState: appState
+                        )
+                    }
+                }
+            )
         }
     }
     
@@ -184,6 +198,11 @@ struct LoginView: View {
             }
             .disabled(!viewModel.isLoginFormValid || viewModel.isLoading)
             .animation(.easeInOut(duration: 0.2), value: viewModel.isLoginFormValid)
+            
+            // Google Sign-In
+            MonederitoGoogleSignInButton(action: {
+                showGoogleRolePicker = true
+            }, isLoading: viewModel.isLoading)
             
             // Biometría
             if viewModel.biometricType != .none {

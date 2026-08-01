@@ -19,6 +19,14 @@ class AppState {
     var selectedBeneficiaryTab: BeneficiaryTab = .wallet
     var pendingAlertID: UUID? = nil
     var pendingOperation: OperationsMainView.OperationType? = nil
+    var hasCompletedOnboarding: Bool {
+        get {
+            UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: "hasCompletedOnboarding")
+        }
+    }
     
     // MARK: - Computed
     var userRole: UserRole? { currentUser?.role }

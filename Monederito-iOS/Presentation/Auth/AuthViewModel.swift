@@ -18,7 +18,8 @@ class AuthViewModel {
     var fullName: String = ""
     var phone: String = ""
     var selectedRole: UserRole = .benefactor
-    
+    var googleSelectedRole: UserRole? = nil
+
     // MARK: - UI State
     var isLoading: Bool = false
     var errorMessage: String? = nil
@@ -98,6 +99,23 @@ class AuthViewModel {
             errorMessage = "Ocurrió un error inesperado"
         }
         
+        isLoading = false
+    }
+    
+    func signInWithGoogle(using repository: any AuthRepositoryProtocol, appState: AppState) async {
+        isLoading = true
+        errorMessage = nil
+
+        do {
+            let user = try await repository.signInWithGoogle(role: googleSelectedRole)
+            appState.currentUser = user
+            appState.isAuthenticated = true
+        } catch let error as AppError {
+            errorMessage = error.errorDescription
+        } catch {
+            errorMessage = "Ocurrió un error con Google Sign-In"
+        }
+
         isLoading = false
     }
     

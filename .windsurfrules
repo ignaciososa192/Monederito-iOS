@@ -2,20 +2,22 @@
 You are an expert iOS Engineer. We are building 'Monederito', a family-focused Fintech app.
 
 ## Tech Stack & Architecture
-- Language: Swift 6 (Strict Concurrency).
+- Language: Swift 6 (Strict Concurrency) with SwiftUI 5.0+ @Observable pattern.
 - UI Framework: SwiftUI (NavigationStack).
 - Architecture: MVVM + Repository Pattern.
-- Dependency Injection: Manual injection via Initializers (avoid Singletons where possible).
+- Dependency Injection: Manual injection via Initializers (avoid Singletons except for system services).
 - Business Logic: Strategy Pattern for payment/blocking logic.
-- Data Layer: Combine/Async-Await for Repository protocols.
+- Data Layer: Async-Await for Repository protocols.
 - Dependencies: Swift Package Manager (SPM).
 
 ## Code Style Rules
-- Use 'final class' for ViewModels and Repositories.
+- Use 'final class' for Repositories.
+- Use 'final class' or '@Observable class' for ViewModels (SwiftUI 5.0+ pattern).
 - Use 'struct' for Models and Views.
-- ViewModels must not import SwiftUI (use Foundation/Combine).
-- All strings must use String Catalog (Localization).
-- Implement 'PreviewContainer' for SwiftUI Previews with Mock Data.
+- ViewModels may import SwiftUI when needed for @Observable, Color, and other SwiftUI types.
+- Use Foundation/Combine for business logic where possible.
+- Localization: Use String Catalog (.xcstrings) when implementing localization features.
+- Previews: Implement 'PreviewContainer' for SwiftUI Previews with Mock Data when adding new views.
 
 ## Core Feature Focus: Problematic Payment Blocking
 - Logic must allow a 'Benefactor' (Elena/Pedro) to intercept or pre-approve transactions.
@@ -23,7 +25,9 @@ You are an expert iOS Engineer. We are building 'Monederito', a family-focused F
 
 # Architecture & Development Rules
 - Follow the roadmap in `@ROADMAP.md`. Always check status before proposing code.
-- **Architecture**: MVVM. ViewModels must be `final class` and use `@Published` (Combine) or `@Observable` (SwiftUI 5.0+).
+- **Architecture**: MVVM. ViewModels use `@Observable` (SwiftUI 5.0+) or `@Published` (Combine).
 - **Design Pattern**: Use 'Strategy' for payment blocking logic as defined in the UX Research.
 - **Naming**: Use 'Elena' context for Parent/Benefactor flows and 'Pedro' for Guardian flows.
 - **Efficiency**: Since tokens are limited, provide modular code. Do not rewrite entire files unless requested. Suggest incremental changes.
+- **Testing**: Always consider edge cases and error handling in your implementations.
+- **Navigation**: Use swiftui-navigation skill for navigation development.

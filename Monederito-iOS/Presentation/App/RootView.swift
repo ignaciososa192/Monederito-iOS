@@ -14,6 +14,9 @@ import SwiftUI
 struct RootView: View {
     
     @Environment(AppState.self) private var appState
+    @State private var showOnboarding = !UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
+    @State private var showAccountSelection = false
+    @State private var selectedRole: UserRole?
     
     var body: some View {
         
@@ -22,7 +25,23 @@ struct RootView: View {
         // no CÓMO transicionar. El framework maneja las animaciones.
         
         Group {
-            if appState.isAuthenticated {
+            if showOnboarding {
+                OnboardingView(showOnboarding: $showOnboarding)
+                    .onChange(of: showOnboarding) { _, newValue in
+                        if !newValue {
+                            appState.hasCompletedOnboarding = true
+                            // After onboarding, show account selection for new users
+                            showAccountSelection = true
+                        }
+                    }
+            } else if showAccountSelection {
+                AccountTypeSelectionView(selectedRole: $selectedRole)
+                    .onChange(of: selectedRole) { _, newValue in
+                        if newValue != nil {
+                            showAccountSelection = false
+                        }
+                    }
+            } else if appState.isAuthenticated {
                 // Usuario logueado — elegir TabView según rol
                 if appState.isBenefactor {
                     BenefactorTabView()

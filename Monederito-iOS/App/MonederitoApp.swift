@@ -6,6 +6,27 @@
 //
 
 import SwiftUI
+import GoogleSignIn
+import FirebaseCore
+import FirebaseAppCheck
+import FirebaseCrashlytics
+
+class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        let providerFactory = MonederitoAppCheckFactory()
+        AppCheck.setAppCheckProviderFactory(providerFactory)
+        FirebaseApp.configure()
+        // Initialize Crashlytics
+        let crashlytics = Crashlytics.crashlytics()
+        crashlytics.setCrashlyticsCollectionEnabled(true)
+        
+        // Configure Google Sign-In
+        GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: SupabaseConfig.googleClientID)
+        
+        return true
+    }
+}
 
 @main
 struct MonederitoApp: App {
@@ -15,10 +36,11 @@ struct MonederitoApp: App {
     // Al inyectarlo con .environment(), todas las Views hijas pueden accederlo.
     @State private var appState = AppState()
     @State private var notificationManager = NotificationManager.shared
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
     // El container decide qué repositorios utilizar
-    // Cambiá .mock por .supabase cuando conectemos el backend
-    private let container = DependencyContainer.mock
+    // Usa .current para detectar automáticamente el ambiente (DEBUG = mock, RELEASE = supabase)
+    private let container = DependencyContainer.current
     private let notificationDelegate = NotificationDelegate()
 
     init() {
@@ -26,6 +48,11 @@ struct MonederitoApp: App {
         notificationDelegate.transactionRepository = container.transactionRepository
         UNUserNotificationCenter.current().delegate = notificationDelegate
         NotificationManager.shared.setup()
+        
+        // Restore Google session on app launch
+        Task {
+            await restoreGoogleSession()
+        }
     }
     
     var body: some Scene {
@@ -48,6 +75,52 @@ struct MonederitoApp: App {
                 .onChange(of: notificationManager.pendingDeepLink) { _, deepLink in
                     handleDeepLink(deepLink)
                 }
+            // In your root view
+            .onOpenURL { url in
+                // Handle Google Sign-In callbacks
+                if GIDSignIn.sharedInstance.handle(url) { return }
+                
+                // Handle deep links for notifications
+                handleIncomingURL(url)
+            }
+        }
+    }
+    
+    private func restoreGoogleSession() async {
+        // Intenta recuperar al usuario silenciosamente
+        if let googleResult = await GoogleSignInManager.shared.restorePreviousSignIn() {
+            print("Sesión de Google restaurada para: \(googleResult.email)")
+            // TODO: If you want to auto-login with restored session, call authRepository.signInWithGoogle()
+        }
+    }
+    
+    private func handleIncomingURL(_ url: URL) {
+        // Parse URL components for deep link handling
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
+              let host = components.host else {
+            print("⚠️ Invalid deep link URL: \(url)")
+            return
+        }
+        
+        // Handle different deep link schemes
+        switch host {
+        case "alert":
+            // monederito://alert/{alertID}
+            if let alertIDString = components.path.components(separatedBy: "/").last,
+               let alertID = UUID(uuidString: alertIDString) {
+                handleDeepLink(.riskAlert(alertID: alertID))
+            }
+        case "transaction":
+            // monederito://transaction
+            handleDeepLink(.transaction)
+        case "settings":
+            // monederito://settings
+            handleDeepLink(.settings)
+        case "beneficiary":
+            // monederito://beneficiary
+            handleDeepLink(.beneficiary)
+        default:
+            print("⚠️ Unknown deep link host: \(host)")
         }
     }
 

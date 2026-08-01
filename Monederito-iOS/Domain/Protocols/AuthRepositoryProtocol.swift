@@ -24,6 +24,7 @@ protocol AuthRepositoryProtocol: AnyObject {
     // El caller debe usar: try await
     
     func signIn(email: String, password: String) async throws -> User
+    func signInWithGoogle(role: UserRole?) async throws -> User
     func signUp(
         email: String,
         password: String,

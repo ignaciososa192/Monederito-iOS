@@ -15,6 +15,10 @@ struct SettingsView: View {
     @State private var viewModel = SettingsViewModel()
     @State private var showEditProfile = false
     @State private var showDeleteConfirmation = false
+    @State private var showHelpCenter = false
+    @State private var showPrivacyPolicy = false
+    @State private var showTerms = false
+    @State private var showNotificationPrefs = false
     
     // CONCEPTO: @AppStorage — lee y escribe en UserDefaults automáticamente
     // Cuando cambia, la View se re-renderiza igual que @State
@@ -113,7 +117,9 @@ struct SettingsView: View {
                         iconColor: Color.monederitoOrange,
                         title: "Preferencias de notificaciones",
                         subtitle: "Qué alertas querés recibir"
-                    ) { }
+                    ) {
+                        showNotificationPrefs = true
+                    }
                 }
                 .padding(.horizontal)
                 
@@ -123,7 +129,9 @@ struct SettingsView: View {
                         icon: "questionmark.circle.fill",
                         iconColor: Color.monederitoOrange,
                         title: "Centro de ayuda"
-                    ) { }
+                    ) {
+                        showHelpCenter = true
+                    }
                     
                     Divider().padding(.leading, 66)
                     
@@ -131,7 +139,9 @@ struct SettingsView: View {
                         icon: "shield.fill",
                         iconColor: Color.monederitoPurple,
                         title: "Política de privacidad"
-                    ) { }
+                    ) {
+                        showPrivacyPolicy = true
+                    }
                     
                     Divider().padding(.leading, 66)
                     
@@ -139,7 +149,9 @@ struct SettingsView: View {
                         icon: "doc.fill",
                         iconColor: Color.safeGreen,
                         title: "Términos y condiciones"
-                    ) { }
+                    ) {
+                        showTerms = true
+                    }
                     
                     Divider().padding(.leading, 66)
                     
@@ -258,6 +270,18 @@ struct SettingsView: View {
             Button("Cancelar", role: .cancel) { }
         } message: {
             Text("Perderás todos tus datos, historial y configuraciones. Esta acción no se puede deshacer.")
+        }
+        .sheet(isPresented: $showHelpCenter) {
+            HelpCenterView()
+        }
+        .sheet(isPresented: $showPrivacyPolicy) {
+            PrivacyPolicyView()
+        }
+        .sheet(isPresented: $showTerms) {
+            TermsAndConditionsView()
+        }
+        .sheet(isPresented: $showNotificationPrefs) {
+            NotificationPreferencesView()
         }
     }
 }

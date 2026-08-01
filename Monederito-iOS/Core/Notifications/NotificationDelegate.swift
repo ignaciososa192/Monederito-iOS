@@ -58,7 +58,7 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
         case NotificationManager.ActionID.approve:
             // APROBAR desde pantalla de bloqueo — sin abrir la app
             Task {
-                try? await transactionRepository?.resolveAlert(
+                _ = try? await transactionRepository?.resolveAlert(
                     alertID: alertID,
                     status: AlertStatus.approved
                 )
@@ -73,7 +73,7 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
         case NotificationManager.ActionID.deny:
             // DENEGAR desde pantalla de bloqueo — sin abrir la app
             Task {
-                try? await transactionRepository?.resolveAlert(
+                _ = try? await transactionRepository?.resolveAlert(
                     alertID: alertID,
                     status: AlertStatus.denied
                 )
@@ -99,3 +99,4 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
         completionHandler()
     }
 }
+

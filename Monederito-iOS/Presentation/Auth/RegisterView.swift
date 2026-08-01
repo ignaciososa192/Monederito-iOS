@@ -242,6 +242,19 @@ struct RegisterView: View {
             .disabled(!isStepValid || viewModel.isLoading)
             .animation(.easeInOut(duration: 0.2), value: isStepValid)
             
+            // Google Sign-In option
+            if currentStep == 2 {
+                MonederitoGoogleSignInButton(action: {
+                    viewModel.googleSelectedRole = viewModel.selectedRole
+                    Task {
+                        await viewModel.signInWithGoogle(
+                            using: container.authRepository,
+                            appState: appState
+                        )
+                    }
+                }, isLoading: viewModel.isLoading)
+            }
+            
             if currentStep == 2 {
                 Text("Al crear tu cuenta aceptás nuestros Términos y Condiciones y Política de Privacidad")
                     .font(.caption2)

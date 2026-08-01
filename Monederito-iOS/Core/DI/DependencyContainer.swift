@@ -26,8 +26,13 @@ final class DependencyContainer {
     let operationsRepository: any OperationsRepositoryProtocol
     let educationRepository: any EducationRepositoryProtocol
     
+    // MARK: - Services
+    let analyticsService: any AnalyticsServiceProtocol
+    let analyticsManager: AnalyticsManager
+    
     // MARK: - Singleton para desarrollo
-    static let mock = DependencyContainer(environment: .mock)
+    // Automatically selects environment based on build configuration
+    static let current = DependencyContainer.currentEnvironment
     
     // CONCEPTO: enum para controlar el ambiente
     enum Environment {
@@ -35,26 +40,38 @@ final class DependencyContainer {
         case supabase   // producción con Supabase
     }
     
+    // Detect current environment from build configuration
+    private static var currentEnvironment: DependencyContainer {
+        #if DEBUG
+        return DependencyContainer(environment: .mock)
+        #else
+        return DependencyContainer(environment: .supabase)
+        #endif
+    }
+    
     init(environment: Environment) {
         switch environment {
         case .mock:
+            let analytics = MockAnalyticsService()
             self.authRepository = MockAuthRepository()
             self.transactionRepository = MockTransactionRepository()
             self.userRepository = MockUserRepository()
             self.operationsRepository = MockOperationsRepository()
             self.educationRepository = MockEducationRepository()
+            self.analyticsService = analytics
+            self.analyticsManager = AnalyticsManager(analyticsService: analytics)
             
         case .supabase:
-            // En el Paso 13 reemplazamos por:
-            // self.authRepository = SupabaseAuthRepository()
-            // self.transactionRepository = SupabaseTransactionRepository()
-            // self.userRepository = SupabaseUserRepository()
-            // Por ahora fallback a mock
-            self.authRepository = MockAuthRepository()
-            self.transactionRepository = MockTransactionRepository()
-            self.userRepository = MockUserRepository()
-            self.operationsRepository = MockOperationsRepository()
-            self.educationRepository = MockEducationRepository()
+
+            let transactionRepo = SupabaseTransactionRepository()
+            let analytics = FirebaseAnalyticsService()
+            self.authRepository = SupabaseAuthRepository()
+            self.transactionRepository = transactionRepo
+            self.userRepository = SupabaseUserRepository()
+            self.operationsRepository = SupabaseOperationsRepository(transactionRepository: transactionRepo)
+            self.educationRepository = SupabaseEducationRepository()
+            self.analyticsService = analytics
+            self.analyticsManager = AnalyticsManager(analyticsService: analytics)
         }
     }
 }

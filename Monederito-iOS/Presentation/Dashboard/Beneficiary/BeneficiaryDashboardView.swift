@@ -44,6 +44,16 @@ struct BeneficiaryDashboardView: View {
         .background(Color.monederitoBackground.ignoresSafeArea())
         .navigationTitle("Mi Billetera")
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    appState.signOut()
+                } label: {
+                    Image(systemName: "rectangle.portrait.and.arrow.right")
+                        .foregroundStyle(Color.monederitoPurple)
+                }
+            }
+        }
         .task {
             if let userID = appState.currentUser?.id {
                 await viewModel.loadData(for: userID)
