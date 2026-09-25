@@ -119,3 +119,18 @@ Supabase security advisor findings must be addressed before exposing the backend
 Prefer adapting the existing schema over introducing additional tables. Add new entities only when a concrete MVP use case cannot be represented safely and cleanly by the current model.
 
 **Rationale:** Keeps the backend comprehensible for a solo developer and reduces migration/security surface area.
+
+
+## DEC-013 — Billetera individual como proyecto de práctica
+**Date:** 2026-09-25
+**Status:** Accepted — sandbox confirmed by owner
+
+La solicitud actual del propietario reemplaza DEC-001, DEC-002 y DEC-003: el producto se cierra como billetera individual y se retira bloqueo antifraude/control parental/aprobación del flujo central. DEC-006 y DEC-007 se adaptan: el esquema debe soportar saldo y movimientos coherentes, y analytics medirá el recorrido de billetera. DEC-008 pertenece a otro repositorio y no se modifica aquí.
+
+Se conserva DEC-004 como alcance sandbox confirmado, DEC-005 como continuidad de arquitectura y DEC-009 como foco iOS. Los hallazgos de DEC-011 requieren volver a comprobarse en el backend actual. El plan vigente es WALLET_PLAN.md; los documentos MVP anteriores quedan como histórico.
+
+## DEC-014 — Preparar extensibilidad para ganancias externas
+**Date:** 2026-09-25
+**Status:** Accepted future direction
+
+El propietario confirma sandbox para portfolio. En futuras versiones podrá evaluarse dinero real y la acreditación de ganancias de otra app, por ejemplo Pasito. El dominio debe poder representar origen externo y referencias idempotentes, pero este hito no implementa pagos reales ni afirma conocer el contrato de Pasito.

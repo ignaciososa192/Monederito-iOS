@@ -94,9 +94,7 @@ iOSInjectionProject/
 .idea/
 .windsurf/
 
-# Documentation
-docs/*.md
-!docs/ROADMAP.md
+# Product and engineering documentation is versioned.
 
 # Supabase
 supabase/
