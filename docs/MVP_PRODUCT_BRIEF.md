@@ -1,3 +1,5 @@
+> Contexto histórico: el alcance de protección familiar queda reemplazado por [WALLET_PLAN.md](WALLET_PLAN.md), según la decisión del 25/09/2026.
+
 # Monederito — MVP Product Brief
 
 **Status:** Living document

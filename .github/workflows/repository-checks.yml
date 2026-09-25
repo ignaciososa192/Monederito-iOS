@@ -1,0 +1,38 @@
+name: Repository checks
+on:
+  pull_request:
+    branches: [develop, master, main]
+  push:
+    branches: [develop, master]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  repository-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check diff whitespace
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: git diff --check "$BASE_SHA" "$HEAD_SHA"
+      - name: Validate tracked JSON and XML property lists
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, plistlib, subprocess
+          paths = subprocess.check_output(['git', 'ls-files', '-z']).decode().split('\0')
+          count = 0
+          for name in filter(None, paths):
+              p = pathlib.Path(name)
+              if p.suffix == '.json' or p.name == 'Package.resolved':
+                  json.loads(p.read_text())
+                  count += 1
+              elif p.suffix == '.plist':
+                  plistlib.loads(p.read_bytes())
+                  count += 1
+          print(f'Validated {count} structured files. iOS build/tests are a separate pending gate.')
+          PY
