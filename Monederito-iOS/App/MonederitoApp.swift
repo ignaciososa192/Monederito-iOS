@@ -14,6 +14,8 @@ import FirebaseCrashlytics
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        guard AppConfiguration.current?.environment == .sandbox else { return true }
+
         let providerFactory = MonederitoAppCheckFactory()
         AppCheck.setAppCheckProviderFactory(providerFactory)
         FirebaseApp.configure()
@@ -39,7 +41,7 @@ struct MonederitoApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
     // El container decide qué repositorios utilizar
-    // Usa .current para detectar automáticamente el ambiente (DEBUG = mock, RELEASE = supabase)
+    // El scheme selecciona Mock o Sandbox, tanto en Debug como en Release.
     private let container = DependencyContainer.current
     private let notificationDelegate = NotificationDelegate()
 
@@ -50,14 +52,20 @@ struct MonederitoApp: App {
         NotificationManager.shared.setup()
         
         // Restore Google session on app launch
-        Task {
-            await restoreGoogleSession()
+        if AppConfiguration.current?.environment == .sandbox {
+            Task { await Self.restoreGoogleSession() }
         }
     }
     
     var body: some Scene {
         WindowGroup {
-            RootView()
+            Group {
+                if let error = AppConfiguration.startupError {
+                    ContentUnavailableView("Configuración pendiente", systemImage: "gearshape", description: Text(error))
+                } else {
+                    RootView()
+                }
+            }
                 // CONCEPTO: .environment() — inyección de dependencias de SwiftUI.
                 // Cualquier View descendiente puede hacer @Environment(AppState.self)
                 // para acceder a este mismo objeto.
@@ -66,6 +74,7 @@ struct MonederitoApp: App {
                 .environment(notificationManager)
             // CONCEPTO: onAppear para pedir permisos al iniciar
                 .task {
+                    guard AppConfiguration.startupError == nil else { return }
                     notificationDelegate.appState = appState
                     if !notificationManager.isAuthorized {
                         await notificationManager.requestAuthorization()
@@ -78,7 +87,8 @@ struct MonederitoApp: App {
             // In your root view
             .onOpenURL { url in
                 // Handle Google Sign-In callbacks
-                if GIDSignIn.sharedInstance.handle(url) { return }
+                if AppConfiguration.current?.environment == .sandbox,
+                   GIDSignIn.sharedInstance.handle(url) { return }
                 
                 // Handle deep links for notifications
                 handleIncomingURL(url)
@@ -86,7 +96,7 @@ struct MonederitoApp: App {
         }
     }
     
-    private func restoreGoogleSession() async {
+    private static func restoreGoogleSession() async {
         // Intenta recuperar al usuario silenciosamente
         if let googleResult = await GoogleSignInManager.shared.restorePreviousSignIn() {
             print("Sesión de Google restaurada para: \(googleResult.email)")
@@ -112,13 +122,13 @@ struct MonederitoApp: App {
             }
         case "transaction":
             // monederito://transaction
-            handleDeepLink(.transaction)
+            appState.selectedBenefactorTab = .dashboard
         case "settings":
             // monederito://settings
             handleDeepLink(.settings)
         case "beneficiary":
             // monederito://beneficiary
-            handleDeepLink(.beneficiary)
+            appState.selectedBenefactorTab = .beneficiaries
         default:
             print("⚠️ Unknown deep link host: \(host)")
         }

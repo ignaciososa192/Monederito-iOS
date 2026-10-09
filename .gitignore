@@ -104,3 +104,8 @@ GoogleService-Info.plist
 
 # Skills
 .windsurfrules
+
+# Local sandbox configuration and CI output
+Config/Sandbox.local.xcconfig
+.ci/
+.ci-build.log

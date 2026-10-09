@@ -1,0 +1,6 @@
+MONEDERITO_ENVIRONMENT = sandbox
+// Copy Sandbox.local.example.xcconfig to Sandbox.local.xcconfig to enable services.
+#include? "Sandbox.local.xcconfig"
+// Symbol upload inputs are required only for sandbox device builds.
+CRASHLYTICS_INPUT_FILE_LIST = $(SRCROOT)/Config/mock-crashlytics.xcfilelist
+CRASHLYTICS_INPUT_FILE_LIST[sdk=iphoneos*] = $(SRCROOT)/Config/sandbox-crashlytics.xcfilelist

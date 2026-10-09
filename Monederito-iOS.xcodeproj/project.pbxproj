@@ -47,6 +47,10 @@
 		934CFCAE2F5B8A2B006048BA /* Monederito-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Monederito-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9367663C2F7D800300FC75CC /* ROADMAP.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ROADMAP.md; sourceTree = "<group>"; };
 		9367663F2F7D802000FC75CC /* Proyecto DiseñoUX. Monederito. A Guada Gutierrez.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Proyecto DiseñoUX. Monederito. A Guada Gutierrez.pdf"; sourceTree = "<group>"; };
+
+        A10000000000000000000001 /* Mock.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Mock.xcconfig; sourceTree = "<group>"; };
+        A10000000000000000000002 /* Sandbox.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Sandbox.xcconfig; sourceTree = "<group>"; };
+        A10000000000000000000003 /* Monederito-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = "Monederito-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -68,6 +72,7 @@
 			path = "Monederito-iOS";
 			sourceTree = "<group>";
 		};
+        A10000000000000000000005 /* Monederito-iOSTests */ = {isa = PBXFileSystemSynchronizedRootGroup; path = "Monederito-iOSTests"; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,12 +115,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+        A10000000000000000000009 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		934CFCA52F5B8A2B006048BA = {
 			isa = PBXGroup;
 			children = (
+                A10000000000000000000004, A10000000000000000000005,
 				934CFCB02F5B8A2B006048BA /* Monederito-iOS */,
 				934CFCAF2F5B8A2B006048BA /* Products */,
 				9367663D2F7D800300FC75CC /* docs */,
@@ -125,6 +132,7 @@
 		934CFCAF2F5B8A2B006048BA /* Products */ = {
 			isa = PBXGroup;
 			children = (
+                A10000000000000000000003,
 				934CFCAE2F5B8A2B006048BA /* Monederito-iOS.app */,
 			);
 			name = Products;
@@ -139,6 +147,8 @@
 			path = docs;
 			sourceTree = "<group>";
 		};
+
+        A10000000000000000000004 /* Config */ = {isa = PBXGroup; children = (A10000000000000000000001, A10000000000000000000002,); path = Config; sourceTree = "<group>"; };
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -197,8 +207,26 @@
 			productReference = 934CFCAE2F5B8A2B006048BA /* Monederito-iOS.app */;
 			productType = "com.apple.product-type.application";
 		};
+        A10000000000000000000006 /* Monederito-iOSTests */ = {
+            isa = PBXNativeTarget;
+            buildConfigurationList = A10000000000000000000007;
+            buildPhases = (A10000000000000000000008, A10000000000000000000009, A1000000000000000000000A,);
+            buildRules = ();
+            dependencies = (A1000000000000000000000B,);
+            fileSystemSynchronizedGroups = (A10000000000000000000005,);
+            name = "Monederito-iOSTests";
+            productName = "Monederito-iOSTests";
+            productReference = A10000000000000000000003;
+            productType = "com.apple.product-type.bundle.unit-test";
+        };
 /* End PBXNativeTarget section */
 
+/* Begin PBXContainerItemProxy section */
+        A1000000000000000000000C = {isa = PBXContainerItemProxy; containerPortal = 934CFCA62F5B8A2B006048BA; proxyType = 1; remoteGlobalIDString = 934CFCAD2F5B8A2B006048BA; remoteInfo = "Monederito-iOS"; };
+/* End PBXContainerItemProxy section */
+/* Begin PBXTargetDependency section */
+        A1000000000000000000000B = {isa = PBXTargetDependency; target = 934CFCAD2F5B8A2B006048BA; targetProxy = A1000000000000000000000C; };
+/* End PBXTargetDependency section */
 /* Begin PBXProject section */
 		934CFCA62F5B8A2B006048BA /* Project object */ = {
 			isa = PBXProject;
@@ -231,6 +259,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+                A10000000000000000000006,
 				934CFCAD2F5B8A2B006048BA /* Monederito-iOS */,
 			);
 		};
@@ -246,24 +275,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+        A1000000000000000000000A = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
 		93AAA923301DB77C000024A3 /* Upload Debug Symbols */ = {
 			isa = PBXShellScriptBuildPhase;
+            alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
+                "$(CRASHLYTICS_INPUT_FILE_LIST)",
 			);
-			inputPaths = (
-				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
-				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}",
-				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist",
-				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist",
-				"$(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)",
-				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}.debug.dylib",
-			);
+			inputPaths = ();
 			name = "Upload Debug Symbols";
 			outputFileListPaths = (
 			);
@@ -271,7 +296,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "${BUILD_DIR%Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\n\n";
+			shellScript = "if [ \"$MONEDERITO_ENVIRONMENT\" != \"sandbox\" ] || [ \"$ACTION\" != \"install\" ]; then\n  exit 0\nfi\n\"${BUILD_DIR%Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -283,6 +308,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+        A10000000000000000000008 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
@@ -409,6 +435,7 @@
 		};
 		934CFCBA2F5B8A2C006048BA /* Debug */ = {
 			isa = XCBuildConfiguration;
+            baseConfigurationReference = A10000000000000000000001;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -446,6 +473,7 @@
 		};
 		934CFCBB2F5B8A2C006048BA /* Release */ = {
 			isa = XCBuildConfiguration;
+            baseConfigurationReference = A10000000000000000000001;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -480,12 +508,270 @@
 			};
 			name = Release;
 		};
+		A20000000000000000000001 /* SandboxDebug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = XVAW3S25WF;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = SandboxDebug;
+		};
+		A20000000000000000000002 /* SandboxRelease */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = XVAW3S25WF;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = SandboxRelease;
+		};
+		A20000000000000000000003 /* SandboxDebug */ = {
+			isa = XCBuildConfiguration;
+            baseConfigurationReference = A10000000000000000000002;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = XVAW3S25WF;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Monederito-iOS/Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "\"Monederito usa biometría para que puedas ingresar de forma rápida y segura\"";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				"OTHER_SWIFT_FLAGS[arch=*]" = "-DFIREBASE_CRASHLYTICS_ENABLED";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.ignaciososa.Monederito-iOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = SandboxDebug;
+		};
+		A20000000000000000000004 /* SandboxRelease */ = {
+			isa = XCBuildConfiguration;
+            baseConfigurationReference = A10000000000000000000002;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = XVAW3S25WF;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Monederito-iOS/Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "\"Monederito usa biometría para que puedas ingresar de forma rápida y segura\"";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				"OTHER_SWIFT_FLAGS[arch=*]" = "-DFIREBASE_CRASHLYTICS_ENABLED";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.ignaciososa.Monederito-iOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = SandboxRelease;
+		};
+        A30000000000000000000001 /* Debug */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                BUNDLE_LOADER = "$(TEST_HOST)";
+                CODE_SIGN_STYLE = Automatic;
+                GENERATE_INFOPLIST_FILE = YES;
+                PRODUCT_BUNDLE_IDENTIFIER = "com.ignaciososa.Monederito-iOSTests";
+                PRODUCT_NAME = "$(TARGET_NAME)";
+                SWIFT_VERSION = 5.0;
+                SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+                TARGETED_DEVICE_FAMILY = "1,2";
+                TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Monederito-iOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Monederito-iOS";
+            };
+            name = Debug;
+        };
+        A30000000000000000000002 /* Release */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                BUNDLE_LOADER = "$(TEST_HOST)";
+                CODE_SIGN_STYLE = Automatic;
+                GENERATE_INFOPLIST_FILE = YES;
+                PRODUCT_BUNDLE_IDENTIFIER = "com.ignaciososa.Monederito-iOSTests";
+                PRODUCT_NAME = "$(TARGET_NAME)";
+                SWIFT_VERSION = 5.0;
+                SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+                TARGETED_DEVICE_FAMILY = "1,2";
+                TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Monederito-iOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Monederito-iOS";
+            };
+            name = Release;
+        };
+        A30000000000000000000003 /* SandboxDebug */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                BUNDLE_LOADER = "$(TEST_HOST)";
+                CODE_SIGN_STYLE = Automatic;
+                GENERATE_INFOPLIST_FILE = YES;
+                PRODUCT_BUNDLE_IDENTIFIER = "com.ignaciososa.Monederito-iOSTests";
+                PRODUCT_NAME = "$(TARGET_NAME)";
+                SWIFT_VERSION = 5.0;
+                SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+                TARGETED_DEVICE_FAMILY = "1,2";
+                TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Monederito-iOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Monederito-iOS";
+            };
+            name = SandboxDebug;
+        };
+        A30000000000000000000004 /* SandboxRelease */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                BUNDLE_LOADER = "$(TEST_HOST)";
+                CODE_SIGN_STYLE = Automatic;
+                GENERATE_INFOPLIST_FILE = YES;
+                PRODUCT_BUNDLE_IDENTIFIER = "com.ignaciososa.Monederito-iOSTests";
+                PRODUCT_NAME = "$(TARGET_NAME)";
+                SWIFT_VERSION = 5.0;
+                SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+                TARGETED_DEVICE_FAMILY = "1,2";
+                TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Monederito-iOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Monederito-iOS";
+            };
+            name = SandboxRelease;
+        };
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
 		934CFCA92F5B8A2B006048BA /* Build configuration list for PBXProject "Monederito-iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
+                A20000000000000000000001,
+                A20000000000000000000002,
 				934CFCB72F5B8A2C006048BA /* Debug */,
 				934CFCB82F5B8A2C006048BA /* Release */,
 			);
@@ -495,12 +781,15 @@
 		934CFCB92F5B8A2C006048BA /* Build configuration list for PBXNativeTarget "Monederito-iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
+                A20000000000000000000003,
+                A20000000000000000000004,
 				934CFCBA2F5B8A2C006048BA /* Debug */,
 				934CFCBB2F5B8A2C006048BA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+        A10000000000000000000007 = {isa = XCConfigurationList; buildConfigurations = (A30000000000000000000001, A30000000000000000000002, A30000000000000000000003, A30000000000000000000004,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */

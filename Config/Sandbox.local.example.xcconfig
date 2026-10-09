@@ -1,0 +1,5 @@
+// xcconfig treats // as a comment, so use the empty substitution in https URLs.
+SUPABASE_URL = https:/$()/YOUR_PROJECT.supabase.co
+SUPABASE_PUBLISHABLE_KEY = YOUR_PUBLISHABLE_KEY
+GOOGLE_CLIENT_ID = YOUR_CLIENT_ID.apps.googleusercontent.com
+GOOGLE_REVERSED_CLIENT_ID = com.googleusercontent.apps.YOUR_CLIENT_ID
