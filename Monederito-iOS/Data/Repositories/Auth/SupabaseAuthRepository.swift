@@ -13,8 +13,8 @@ final class SupabaseAuthRepository: AuthRepositoryProtocol {
     private let client: SupabaseClient
     private let securityService: SecurityServiceProtocol
     
-    init(securityService: SecurityServiceProtocol = SecurityService()) {
-        guard let client = SupabaseConfig.client else {
+    init(client: SupabaseClient? = SupabaseConfig.client, securityService: SecurityServiceProtocol = SecurityService()) {
+        guard let client else {
             fatalError("Supabase is not configured. Check SupabaseConfig.swift")
         }
         self.client = client
@@ -69,9 +69,9 @@ final class SupabaseAuthRepository: AuthRepositoryProtocol {
     
     // MARK: - Sign Up
     
-    func signUp(email: String, password: String, fullName: String, role: UserRole, phone: String) async throws -> User {
+    func signUp(email: String, password: String, fullName: String, role: UserRole, phone: String) async throws -> SignUpResult {
         do {
-            let session = try await client.auth.signUp(
+            let response = try await client.auth.signUp(
                 email: email,
                 password: password,
                 data: [
@@ -81,17 +81,20 @@ final class SupabaseAuthRepository: AuthRepositoryProtocol {
                 ]
             )
             
+            guard let session = response.session else {
+                return .confirmationRequired(email: email)
+            }
             let authUser = session.user
             
             // El trigger de Supabase crea el perfil automáticamente
             // Usamos retry logic con exponential backoff para esperar el trigger
-            return try await fetchOrCreateProfileWithRetry(
+            return .authenticated(try await fetchOrCreateProfileWithRetry(
                 for: authUser,
                 fullName: fullName,
                 email: email,
                 role: role,
                 phone: phone
-            )
+            ))
         } catch let error as AppError {
             throw error
         } catch {
@@ -174,25 +177,6 @@ final class SupabaseAuthRepository: AuthRepositoryProtocol {
             if let data = response?.data,
                let profile = try? JSONDecoder().decode(SupabaseProfile.self, from: data) {
 
-                // Si el rol es diferente, actualizarlo
-                if UserRole(rawValue: profile.role) != role {
-                    try await client
-                        .from(SupabaseConfig.Tables.profiles)
-                        .update(["role": role.rawValue])
-                        .eq("id", value: authUser.id.uuidString)
-                        .execute()
-
-                    return User(
-                        id: UUID(uuidString: profile.id) ?? UUID(),
-                        fullName: fullName ?? profile.fullName,
-                        email: email ?? profile.email,
-                        role: role,
-                        benefactorID: profile.benefactorId.flatMap { UUID(uuidString: $0) },
-                        monthlyLimit: profile.monthlyLimit,
-                        dailyLimit: profile.dailyLimit
-                    )
-                }
-
                 return profile.toUser()
             }
             
@@ -218,7 +202,7 @@ final class SupabaseAuthRepository: AuthRepositoryProtocol {
         do {
             try await client
                 .from(SupabaseConfig.Tables.profiles)
-                .upsert(newProfile, onConflict: "id")
+                .upsert(newProfile, onConflict: "id", ignoreDuplicates: true)
                 .execute()
         } catch {
             // Si upsert falla, podría ser que el perfil fue creado por otro request
@@ -229,7 +213,7 @@ final class SupabaseAuthRepository: AuthRepositoryProtocol {
             throw AppError.profileCreationFailed
         }
 
-        return newProfile.toUser()
+        return try await fetchExistingProfile(for: authUser)
     }
     
     // Helper para buscar perfil existente sin retry
@@ -267,25 +251,6 @@ final class SupabaseAuthRepository: AuthRepositoryProtocol {
         if let data = response?.data,
            let profile = try? JSONDecoder().decode(SupabaseProfile.self, from: data) {
 
-            // Si el rol es diferente, actualizarlo
-            if UserRole(rawValue: profile.role) != role {
-                try await client
-                    .from(SupabaseConfig.Tables.profiles)
-                    .update(["role": role.rawValue])
-                    .eq("id", value: authUser.id.uuidString)
-                    .execute()
-
-                return User(
-                    id: UUID(uuidString: profile.id) ?? UUID(),
-                    fullName: fullName ?? profile.fullName,
-                    email: email ?? profile.email,
-                    role: role,
-                    benefactorID: profile.benefactorId.flatMap { UUID(uuidString: $0) },
-                    monthlyLimit: profile.monthlyLimit,
-                    dailyLimit: profile.dailyLimit
-                )
-            }
-
             return profile.toUser()
         }
 
@@ -303,10 +268,10 @@ final class SupabaseAuthRepository: AuthRepositoryProtocol {
 
         try await client
             .from(SupabaseConfig.Tables.profiles)
-            .upsert(newProfile, onConflict: "id")
+            .upsert(newProfile, onConflict: "id", ignoreDuplicates: true)
             .execute()
 
-        return newProfile.toUser()
+        return try await fetchExistingProfile(for: authUser)
     }
     
     // Mapear errores de Supabase a AppError

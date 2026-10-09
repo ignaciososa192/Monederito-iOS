@@ -29,10 +29,10 @@ final class MockAuthRepository: AuthRepositoryProtocol {
         return role == .beneficiary ? MockData.beneficiaryUser : MockData.benefactorUser
     }
     
-    func signUp(email: String, password: String, fullName: String, role: UserRole, phone: String) async throws -> User {
+    func signUp(email: String, password: String, fullName: String, role: UserRole, phone: String) async throws -> SignUpResult {
         try await simulateNetworkDelay()
         guard email.contains("@") else { throw AppError.invalidCredentials }
-        return User(fullName: fullName, email: email, role: role)
+        return .authenticated(User(fullName: fullName, email: email, role: role))
     }
     
     func signOut() async throws {

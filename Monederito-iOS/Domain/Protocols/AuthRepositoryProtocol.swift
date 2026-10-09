@@ -16,6 +16,11 @@ import Foundation
 // - async: no bloquea el hilo principal mientras espera la red
 // - throws: puede lanzar un error que debés capturar con try/catch
 
+enum SignUpResult {
+    case authenticated(User)
+    case confirmationRequired(email: String)
+}
+
 protocol AuthRepositoryProtocol: AnyObject {
     
     // CONCEPTO: async throws
@@ -31,7 +36,7 @@ protocol AuthRepositoryProtocol: AnyObject {
         fullName: String,
         role: UserRole,
         phone: String
-    ) async throws -> User
+    ) async throws -> SignUpResult
     func signOut() async throws
     func getCurrentUser() async throws -> User?
     func resetPassword(email: String) async throws
