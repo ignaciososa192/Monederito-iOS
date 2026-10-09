@@ -5,7 +5,7 @@
 | Scheme | Run/Test | Archive/Profile | Backend |
 |---|---|---|---|
 | Monederito-Mock | Debug | Release | Repositorios mock y analytics mock; no Firebase/Google/Supabase al arrancar |
-| Monederito-Sandbox | SandboxDebug | SandboxRelease | Integraciones configuradas explícitamente |
+| Monederito-Sandbox | Run: SandboxDebug; tests: Debug mock | SandboxRelease | Integraciones configuradas explícitamente |
 
 Debug/Release indican optimización, no el backend. No existe selección automática de producción. El modo Mock no necesita cuenta de Apple Developer paga, credenciales de backend ni GoogleService-Info.plist para simulador. La primera resolución de paquetes sí necesita Internet.
 
@@ -50,3 +50,5 @@ La validación local de estructura del proyecto, schemes, plist, shell y diff se
 Referencia de toolchain: https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md
 
 Durante W01 se corrige también un bloqueo de compilación del baseline: `fetchExistingProfile` intentaba optional binding sobre `PostgrestResponse.data` y el resultado no opcional de JSONDecoder.decode. El SDK Supabase 2.43.1 declara data como Data no opcional; se decodifica directamente y se propagan los errores. Los cambios de comportamiento de auth siguen en W02.
+
+La primera compilación CI detectó dos constructores de DeepLink incompletos en MonederitoApp: los enlaces sin ID a transaction/beneficiary seleccionan ahora sus tabs directamente, sin inventar UUID. Los tests del scheme Sandbox también usan Mock: las integraciones reales se prueban por separado en W02/W03. CI conserva el log completo como artifact y muestra un resumen en el job.

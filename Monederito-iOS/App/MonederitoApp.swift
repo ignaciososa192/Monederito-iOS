@@ -122,13 +122,13 @@ struct MonederitoApp: App {
             }
         case "transaction":
             // monederito://transaction
-            handleDeepLink(.transaction)
+            appState.selectedBenefactorTab = .dashboard
         case "settings":
             // monederito://settings
             handleDeepLink(.settings)
         case "beneficiary":
             // monederito://beneficiary
-            handleDeepLink(.beneficiary)
+            appState.selectedBenefactorTab = .beneficiaries
         default:
             print("⚠️ Unknown deep link host: \(host)")
         }

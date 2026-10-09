@@ -21,11 +21,17 @@ jobs:
       - name: Show toolchain
         run: xcodebuild -version
       - name: Build and test without private service configuration
-        run: bash Scripts/ci-ios.sh
+        run: |
+          status=0
+          bash Scripts/ci-ios.sh > .ci-build.log 2>&1 || status=$?
+          tail -n 120 .ci-build.log
+          exit "$status"
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ios-test-results
-          path: .ci/MockTests.xcresult
+          path: |
+            .ci/MockTests.xcresult
+            .ci-build.log
           if-no-files-found: ignore

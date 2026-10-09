@@ -108,3 +108,4 @@ GoogleService-Info.plist
 # Local sandbox configuration and CI output
 Config/Sandbox.local.xcconfig
 .ci/
+.ci-build.log
