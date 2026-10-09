@@ -60,6 +60,6 @@ Crear un tag anotado `vX.Y.Z` sobre el commit exacto de master validado y public
 
 Un PR explica problema y resultado; contiene un solo objetivo; declara cambios de contrato y migración; verifica escenarios de éxito/error/reintento relevantes; incluye pruebas del dominio cuando corresponda. Para UI, evidencia de navegación, accesibilidad y estados vacío/carga/error. No dar éxito antes de persistir una operación.
 
-El workflow inicial comprueba higiene y formatos del repositorio. **No compila ni prueba la app**. La integración CI iOS es un P0 independiente que necesita scheme compartido, configuración mock autónoma y un runner con SDK compatible.
+Repository checks verifica higiene y formatos; el workflow iOS compila Mock/Sandbox y ejecuta tests hosted en Mock con Xcode 26.2. Ver docs/W01_BUILD.md para reproducirlo y configurar Sandbox. Exigir ambos checks en develop después de verificar la primera ejecución.
 
 Referencias: https://semver.org/ y https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches

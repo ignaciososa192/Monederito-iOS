@@ -31,7 +31,7 @@ final class DependencyContainer {
     let analyticsManager: AnalyticsManager
     
     // MARK: - Singleton para desarrollo
-    // Automatically selects environment based on build configuration
+    // The shared scheme selects the backend independently of build optimization.
     static let current = DependencyContainer.currentEnvironment
     
     // CONCEPTO: enum para controlar el ambiente
@@ -40,15 +40,13 @@ final class DependencyContainer {
         case supabase   // producción con Supabase
     }
     
-    // Detect current environment from build configuration
+    // Invalid sandbox configuration is shown by the app's startup error screen.
+    // Do not construct network repositories before configuration is validated.
     private static var currentEnvironment: DependencyContainer {
-        #if DEBUG
-        return DependencyContainer(environment: .mock)
-        #else
-        return DependencyContainer(environment: .supabase)
-        #endif
+        let environment: Environment = AppConfiguration.current?.environment == .sandbox ? .supabase : .mock
+        return DependencyContainer(environment: environment)
     }
-    
+
     init(environment: Environment) {
         switch environment {
         case .mock:

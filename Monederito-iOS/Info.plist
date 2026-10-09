@@ -11,11 +11,17 @@
 			<string></string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.525232504558-hpo1s9qsq7pvrat5p2j01u81b8ut0b08</string>
+				<string>$(GOOGLE_REVERSED_CLIENT_ID)</string>
 			</array>
 		</dict>
 	</array>
 	<key>GIDClientID</key>
-	<string>525232504558-hpo1s9qsq7pvrat5p2j01u81b8ut0b08.apps.googleusercontent.com</string>
+	<string>$(GOOGLE_CLIENT_ID)</string>
+	<key>MONEDERITO_ENVIRONMENT</key>
+	<string>$(MONEDERITO_ENVIRONMENT)</string>
+	<key>SUPABASE_PUBLISHABLE_KEY</key>
+	<string>$(SUPABASE_PUBLISHABLE_KEY)</string>
+	<key>SUPABASE_URL</key>
+	<string>$(SUPABASE_URL)</string>
 </dict>
 </plist>

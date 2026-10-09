@@ -19,7 +19,7 @@ Los documentos MVP de agosto describen la hipótesis anterior de protección fam
 
 Abrir `Monederito-iOS.xcodeproj` en Xcode con SDK compatible con el deployment target actual iOS 26.2. Resolver Swift Packages respetando `Package.resolved`.
 
-La selección actual usa mocks en Debug y Supabase en Release. Firebase se inicializa en ambos: hoy se requiere una configuración válida `GoogleService-Info.plist` del entorno correspondiente, no incluida en el repositorio. El modo mock aún no es completamente autónomo.
+Seleccionar **Monederito-Mock** para ejecutar y probar sin configuración de servicios. **Monederito-Sandbox** usa configuración local explícita. Ambos entornos tienen configuraciones Debug y Release independientes. Ver [W01: build y revisión](docs/W01_BUILD.md).
 
 No introducir claves privadas, service-role ni credenciales de firma en Git. La configuración reproducible por entorno y la compilación CI son tareas P0 del backlog.
 

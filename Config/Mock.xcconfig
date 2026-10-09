@@ -1,0 +1,7 @@
+// Debug and Release both run offline without service configuration.
+MONEDERITO_ENVIRONMENT = mock
+SUPABASE_URL =
+SUPABASE_PUBLISHABLE_KEY =
+GOOGLE_CLIENT_ID =
+GOOGLE_REVERSED_CLIENT_ID = monederito-mock-google-disabled
+CRASHLYTICS_INPUT_FILE_LIST = $(SRCROOT)/Config/mock-crashlytics.xcfilelist
