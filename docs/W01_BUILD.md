@@ -52,3 +52,5 @@ Referencia de toolchain: https://github.com/actions/runner-images/blob/main/imag
 Durante W01 se corrige también un bloqueo de compilación del baseline: `fetchExistingProfile` intentaba optional binding sobre `PostgrestResponse.data` y el resultado no opcional de JSONDecoder.decode. El SDK Supabase 2.43.1 declara data como Data no opcional; se decodifica directamente y se propagan los errores. Los cambios de comportamiento de auth siguen en W02.
 
 La primera compilación CI detectó dos constructores de DeepLink incompletos en MonederitoApp: los enlaces sin ID a transaction/beneficiary seleccionan ahora sus tabs directamente, sin inventar UUID. Los tests del scheme Sandbox también usan Mock: las integraciones reales se prueban por separado en W02/W03. CI conserva el log completo como artifact y muestra un resumen en el job.
+
+Otro bloqueo de compilación del arranque fue la captura de self mutable desde Task en el inicializador de MonederitoApp. La restauración del SDK Google pasa a función estática, sin alterar el flujo de sesión pendiente de W02.

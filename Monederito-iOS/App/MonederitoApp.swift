@@ -53,7 +53,7 @@ struct MonederitoApp: App {
         
         // Restore Google session on app launch
         if AppConfiguration.current?.environment == .sandbox {
-            Task { await restoreGoogleSession() }
+            Task { await Self.restoreGoogleSession() }
         }
     }
     
@@ -96,7 +96,7 @@ struct MonederitoApp: App {
         }
     }
     
-    private func restoreGoogleSession() async {
+    private static func restoreGoogleSession() async {
         // Intenta recuperar al usuario silenciosamente
         if let googleResult = await GoogleSignInManager.shared.restorePreviousSignIn() {
             print("Sesión de Google restaurada para: \(googleResult.email)")
