@@ -241,10 +241,7 @@ final class SupabaseAuthRepository: AuthRepositoryProtocol {
             .single()
             .execute()
         
-        guard let data = response.data,
-              let profile = try JSONDecoder().decode(SupabaseProfile.self, from: data) else {
-            throw AppError.userNotFound
-        }
+        let profile = try JSONDecoder().decode(SupabaseProfile.self, from: response.data)
         
         return profile.toUser()
     }

@@ -48,3 +48,5 @@ No se ejecuta un merge automático. Para exigir los checks, configurar el rulese
 La validación local de estructura del proyecto, schemes, plist, shell y diff se realiza antes de publicar. El entorno de ejecución del agente tiene restricciones de CoreSimulator y evaluación de manifiestos Swift; por eso se añade CI en un runner macOS con Xcode 26.2 explícito. El resultado de CI y su enlace se registran en el PR; no confundir compilación de Sandbox con integración verificada.
 
 Referencia de toolchain: https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md
+
+Durante W01 se corrige también un bloqueo de compilación del baseline: `fetchExistingProfile` intentaba optional binding sobre `PostgrestResponse.data` y el resultado no opcional de JSONDecoder.decode. El SDK Supabase 2.43.1 declara data como Data no opcional; se decodifica directamente y se propagan los errores. Los cambios de comportamiento de auth siguen en W02.
