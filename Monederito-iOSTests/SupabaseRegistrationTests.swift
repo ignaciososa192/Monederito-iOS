@@ -51,6 +51,7 @@ private final class AuthFixtureProtocol: URLProtocol {
         let authUser = """
         {"id":"11111111-1111-1111-1111-111111111111","app_metadata":{},"user_metadata":{},"aud":"authenticated","email":"wallet@example.com","created_at":"2026-10-09T12:00:00Z","updated_at":"2026-10-09T12:00:00Z"}
         """
+        let expiresAt = Date().addingTimeInterval(3600).timeIntervalSince1970
         let path = request.url!.path
         let payload: String
         var bodyData = request.httpBody ?? Data()
@@ -68,7 +69,7 @@ private final class AuthFixtureProtocol: URLProtocol {
         if path == "/auth/v1/signup", !body.contains("immediate@example.com") {
             payload = authUser
         } else if path == "/auth/v1/token" || path == "/auth/v1/signup" {
-            payload = "{\"access_token\":\"fixture\",\"token_type\":\"bearer\",\"expires_in\":3600,\"refresh_token\":\"fixture\",\"user\":\(authUser)}"
+            payload = "{\"access_token\":\"fixture\",\"token_type\":\"bearer\",\"expires_in\":3600,\"expires_at\":\(expiresAt),\"refresh_token\":\"fixture\",\"user\":\(authUser)}"
         } else if path == "/rest/v1/profiles", request.httpMethod == "GET" {
             payload = """
             {"id":"11111111-1111-1111-1111-111111111111","full_name":"Persisted Name","email":"wallet@example.com","role":"beneficiary"}
