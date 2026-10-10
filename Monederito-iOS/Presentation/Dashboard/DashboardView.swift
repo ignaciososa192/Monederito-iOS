@@ -65,7 +65,7 @@ struct DashboardView: View {
             
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
-                    appState.signOut()
+                    Task { await appState.signOut(using: container.authRepository) }
                 } label: {
                     Image(systemName: "rectangle.portrait.and.arrow.right")
                         .foregroundStyle(Color.monederitoOrange)

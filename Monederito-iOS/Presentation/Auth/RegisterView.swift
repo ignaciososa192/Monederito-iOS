@@ -44,6 +44,12 @@ struct RegisterView: View {
                                 stepTwoContent
                             }
                             
+                            if let email = viewModel.confirmationEmail {
+                                Text("Revisá tu correo en \(email) y confirmá tu cuenta. Después volvé a iniciar sesión.")
+                                    .font(.callout)
+                                    .accessibilityIdentifier("registrationConfirmation")
+                            }
+
                             // Error
                             if let error = viewModel.errorMessage {
                                 HStack(spacing: 8) {

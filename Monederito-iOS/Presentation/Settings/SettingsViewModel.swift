@@ -81,10 +81,7 @@ class SettingsViewModel {
     }
     
     func signOut(using repo: any AuthRepositoryProtocol, appState: AppState) async {
-        do {
-            try await repo.signOut()
-        } catch { }
-        appState.signOut()
+        await appState.signOut(using: repo)
     }
     
     func deleteAccount() async {

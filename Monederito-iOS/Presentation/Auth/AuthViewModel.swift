@@ -8,6 +8,7 @@
 import SwiftUI
 import LocalAuthentication
 
+@MainActor
 @Observable
 class AuthViewModel {
     
@@ -23,6 +24,7 @@ class AuthViewModel {
     // MARK: - UI State
     var isLoading: Bool = false
     var errorMessage: String? = nil
+    var confirmationEmail: String? = nil
     var showPassword: Bool = false
     var showConfirmPassword: Bool = false
     
@@ -120,19 +122,28 @@ class AuthViewModel {
     }
     
     func signUp(using repository: any AuthRepositoryProtocol, appState: AppState) async {
+        guard !isLoading else { return }
+        confirmationEmail = nil
         isLoading = true
         errorMessage = nil
         
         do {
-            let user = try await repository.signUp(
+            let result = try await repository.signUp(
                 email: email,
                 password: password,
                 fullName: fullName,
                 role: selectedRole,
                 phone: phone
             )
-            appState.currentUser = user
-            appState.isAuthenticated = true
+            switch result {
+            case .authenticated(let user):
+                appState.currentUser = user
+                appState.isAuthenticated = true
+            case .confirmationRequired(let email):
+                confirmationEmail = email
+                password = ""
+                confirmPassword = ""
+            }
         } catch let error as AppError {
             errorMessage = error.errorDescription
         } catch {
@@ -185,9 +196,12 @@ class AuthViewModel {
             }
             
             if success {
-                // En producción: recuperar credenciales del Keychain
-                // Por ahora simulamos login exitoso
-                appState.loginAsBenefactor()
+                guard let user = try await repository.getCurrentUser() else {
+                    errorMessage = "Iniciá sesión con tu correo o Google primero."
+                    return
+                }
+                appState.currentUser = user
+                appState.isAuthenticated = true
             }
         } catch {
             // El usuario canceló o falló — no mostramos error
