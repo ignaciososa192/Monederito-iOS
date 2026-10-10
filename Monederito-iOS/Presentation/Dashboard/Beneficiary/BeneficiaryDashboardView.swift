@@ -9,6 +9,7 @@ import SwiftUI
 
 struct BeneficiaryDashboardView: View {
     
+    @Environment(DependencyContainer.self) private var container
     @Environment(AppState.self) private var appState
     @State private var viewModel = BeneficiaryDashboardViewModel()
     
@@ -47,7 +48,7 @@ struct BeneficiaryDashboardView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
-                    appState.signOut()
+                    Task { await appState.signOut(using: container.authRepository) }
                 } label: {
                     Image(systemName: "rectangle.portrait.and.arrow.right")
                         .foregroundStyle(Color.monederitoPurple)

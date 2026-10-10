@@ -1,31 +1,42 @@
-# W02 — autenticación (primer PR)
+# W02 — autenticación y sesión
 
-Estado: implementación parcial, pendiente de build/tests iOS y validación Sandbox. W02 no está cerrado.
+## Cambios
 
-## Contratos corregidos
+El registro distingue usuario autenticado de confirmación de correo pendiente. Login por correo/Google y restauración conservan el rol guardado; los upserts ignoran duplicados y recuperan el perfil persistido.
 
-- `signUp` devuelve `SignUpResult`: usuario autenticado únicamente cuando Supabase devuelve sesión; si requiere confirmar correo, muestra instrucciones y limpia las contraseñas sin consultar/crear perfiles.
-- Login por correo y Google, registro y consulta del usuario conservan el rol del perfil existente. La selección de rol sólo se usa al crear un perfil nuevo.
-- Si el perfil aparece entre lectura e inserción, el upsert ignora duplicados y vuelve a leer la fila persistida, sin sobrescribirla.
-- AuthViewModel ejecuta sus cambios en MainActor y evita registros simultáneos.
+La app restaura Supabase al arrancar y volver a foreground. El SDK renueva tokens expirados; un refresh token inexistente/reutilizado elimina la sesión. Los errores de red/perfil se muestran, sin convertirlos silenciosamente en ausencia de sesión. El evento signedOut limpia usuario y rutas; una restauración tardía no puede deshacer logout.
 
-## Verificación en esta computadora (09/10/2026)
+Recuperación tiene solicitud de correo, callback PKCE, formulario de contraseña nueva y logout al finalizar/cancelar. Registro confirma por `monederito://auth/callback`; recuperación usa `monederito://auth/recovery` para diferenciar el flujo incluso con el SDK 2.43.1, que emite signedIn al intercambiar códigos PKCE. Se valida el enlace mediante el SDK antes de habilitar el formulario. Abrir el enlace en el mismo dispositivo que lo solicitó.
 
-- `git diff --check`: pasó.
-- Parse de los siete archivos Swift modificados/agregados con `swiftc -frontend -parse`: pasó. No equivale a compilar o ejecutar tests.
-- Package.resolved permanece intacto.
-- `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer Scripts/ci-ios.sh`: dos intentos bloqueados por el entorno del agente. Primero no pudo escribir diagnósticos en caché de SwiftPM. Tras habilitar esas carpetas, falló con `sandbox-exec: sandbox_apply: Operation not permitted`. CoreSimulator también rechazó la conexión. No hay resultados de build ni tests aprobados.
-- Se agregan tres tests de presentación y tres del adaptador Supabase con URLProtocol local: registro sin sesión, con sesión, error y conservación de rol. No se usan credenciales ni servicios externos. Ejecución pendiente.
+Los botones de logout de dashboard/settings eliminan tokens del SDK. Biometría sólo recupera una sesión existente, nunca crea una identidad Mock. Accesos DEBUG ficticios se muestran únicamente en Mock.
 
-## Recorrido local pendiente
+## Configuración Sandbox
 
-1. Abrir el proyecto en Xcode, elegir Monederito-Mock y ejecutar Product → Test (Cmd-U). Revisar AuthRegistrationTests, SupabaseRegistrationTests y EnvironmentTests.
-2. Ejecutar `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer Scripts/ci-ios.sh` desde una terminal local para los tests y builds Release/Sandbox.
-3. En Mock, registrar una cuenta: debe entrar con el usuario retornado por el repositorio.
-4. Con configuración Sandbox, probar registro con Confirm email activado: permanece en registro, muestra el correo y no entra a la app. Confirmar el correo y volver al login manualmente.
-5. Con Confirm email desactivado, una cuenta nueva entra únicamente después de recuperar el perfil.
-6. Con una cuenta beneficiary existente, iniciar por email y por Google aunque la UI elija benefactor: el perfil debe conservar beneficiary. Verificar la fila antes/después en Sandbox.
+`Config/Sandbox.local.xcconfig` y `GoogleService-Info.plist` permanecen locales e ignorados. El proyecto Supabase monederito fue restaurado con autorización del propietario y quedó ACTIVE_HEALTHY. Las tablas profiles/transactions/beneficiary_accounts/risk_alerts existen; el trigger on_auth_user_created crea el perfil. No se aplicaron cambios SQL ni migraciones.
 
-## Siguientes partes de W02
+En Supabase Authentication → URL Configuration, permitir exactamente:
 
-Restauración real de Supabase al relanzar, expiración/refresh y errores, recuperación completa (solicitud, callback y contraseña nueva), logout y eliminación de login ficticio por biometría. El callback de confirmación automática tampoco se implementa en este primer PR. Google real y el caso concurrente de creación requieren validación Sandbox. No iniciar W03 hasta integrar W02 completo.
+- `monederito://auth/callback`
+- `monederito://auth/recovery`
+
+Esta allow-list remota debe verificarse antes de probar correos reales. El plist registra el scheme monederito y el callback Google existente. No usar service-role en la app.
+
+## Validación
+
+Los tests de la primera entrega (registro y roles) pasaron en el run 38006703485, y Release compiló; el job fue cancelado durante los builds adicionales. La corrección expires_at de las fixtures quedó validada.
+
+Para esta ampliación: diff --check y parse Swift pasan. Scripts/ci-ios.sh fue intentado localmente y bloqueado por restricciones de caché SwiftPM/CoreSimulator del agente. CI del último commit y el recorrido Sandbox quedan pendientes hasta registrar su resultado.
+
+Tests nuevos: restauración, logout y limpieza de rutas, error visible, restauración tardía tras logout, recuperación sin acceso a billetera, persistencia SDK con nuevo cliente, token expirado/refresh, logout persistido, solicitud/callback/actualización de contraseña con transporte HTTP local. Package.resolved permanece intacto.
+
+## Recorrido local antes de cerrar W02
+
+1. Monederito-Mock → Cmd-U. Verificar EnvironmentTests/AuthRegistrationTests/AuthSessionTests/SupabaseRegistrationTests.
+2. Monederito-Sandbox → Cmd-R. Login por correo con usuario existente; matar/relanzar y confirmar que vuelve a la misma cuenta/rol.
+3. Logout desde dashboard y settings; relanzar y verificar que permanece fuera. Simular error de red al restaurar: mostrar error y permitir reintento al volver a foreground.
+4. Registrar con confirmación activada: instrucciones de correo, sin acceso a billetera; abrir el enlace en el mismo dispositivo. Sin confirmación: entrar con perfil recuperado.
+5. Google con perfil existente de otro rol: no cambiar el rol; cancelar Google no autentica.
+6. Solicitar recuperación; abrir enlace, guardar contraseña nueva y volver al login. Contraseña nueva funciona y vieja falla. Enlace inválido/expirado informa error; cancelar recuperación elimina sesión.
+7. Expiración: validar refresh y sesión revocada. Biometría sin sesión no autentica. Accesos DEBUG no aparecen en Sandbox.
+
+W02 se cierra tras CI verde y este recorrido real. Confirmación/email/Google requieren validación manual con la configuración remota. W03/W08 siguen fuera de alcance.

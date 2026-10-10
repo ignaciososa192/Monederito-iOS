@@ -196,9 +196,12 @@ class AuthViewModel {
             }
             
             if success {
-                // En producción: recuperar credenciales del Keychain
-                // Por ahora simulamos login exitoso
-                appState.loginAsBenefactor()
+                guard let user = try await repository.getCurrentUser() else {
+                    errorMessage = "Iniciá sesión con tu correo o Google primero."
+                    return
+                }
+                appState.currentUser = user
+                appState.isAuthenticated = true
             }
         } catch {
             // El usuario canceló o falló — no mostramos error

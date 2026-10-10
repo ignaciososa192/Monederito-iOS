@@ -78,7 +78,8 @@ final class SupabaseAuthRepository: AuthRepositoryProtocol {
                     "full_name": AnyJSON.string(fullName),
                     "role":      AnyJSON.string(role.rawValue),
                     "phone":     AnyJSON.string(phone)
-                ]
+                ],
+                redirectTo: URL(string: "monederito://auth/callback")
             )
             
             guard let session = response.session else {
@@ -106,24 +107,51 @@ final class SupabaseAuthRepository: AuthRepositoryProtocol {
     
     func signOut() async throws {
         GoogleSignInManager.shared.signOut()
-        try await client.auth.signOut()
+        try await client.auth.signOut(scope: .local)
     }
     
     func getCurrentUser() async throws -> User? {
         do {
             let session = try await client.auth.session
             return try await fetchOrCreateProfile(for: session.user)
-        } catch {
-            // Log error for debugging but return nil (no session)
-            print("⚠️ Error getting current user: \(error.localizedDescription)")
+        } catch AuthError.sessionMissing {
             return nil
+        } catch AuthError.api(_, let code, _, _) where code == .refreshTokenNotFound || code == .refreshTokenAlreadyUsed {
+            try? await client.auth.signOut(scope: .local)
+            return nil
+        } catch {
+            throw mapSupabaseError(error)
         }
     }
-    
+
     func resetPassword(email: String) async throws {
-        try await client.auth.resetPasswordForEmail(email)
+        try await client.auth.resetPasswordForEmail(email, redirectTo: URL(string: "monederito://auth/recovery"))
     }
-    
+
+    func updatePassword(_ password: String) async throws {
+        _ = try await client.auth.update(user: UserAttributes(password: password))
+    }
+
+    func handleAuthCallback(_ url: URL) async throws {
+        _ = try await client.auth.session(from: url)
+    }
+
+    func sessionEvents() -> AsyncStream<AuthSessionEvent> {
+        AsyncStream { continuation in
+            let task = Task {
+                for await change in client.auth.authStateChanges {
+                    switch change.event {
+                    case .signedOut: continuation.yield(.signedOut)
+                    case .passwordRecovery: continuation.yield(.passwordRecovery)
+                    default: break
+                    }
+                }
+                continuation.finish()
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
+    }
+
     func updateProfile(_ user: User) async throws -> User {
         try await client
             .from(SupabaseConfig.Tables.profiles)

@@ -4,14 +4,14 @@ import Supabase
 
 @MainActor
 final class SupabaseRegistrationTests: XCTestCase {
-    private func repository() -> SupabaseAuthRepository {
+    private func repository(storage: any AuthLocalStorage = EmptyAuthStorage()) -> SupabaseAuthRepository {
         let config = URLSessionConfiguration.ephemeral
         config.protocolClasses = [AuthFixtureProtocol.self]
         let client = SupabaseClient(
             supabaseURL: URL(string: "https://auth-fixture.invalid")!,
             supabaseKey: "test-key",
             options: .init(
-                auth: .init(storage: EmptyAuthStorage(), autoRefreshToken: false),
+                auth: .init(storage: storage, autoRefreshToken: false),
                 global: .init(session: URLSession(configuration: config))
             )
         )
@@ -36,6 +36,33 @@ final class SupabaseRegistrationTests: XCTestCase {
         XCTAssertEqual(user.role, .beneficiary)
         XCTAssertEqual(user.fullName, "Persisted Name")
     }
+    func testSessionRestoresWithNewClientAndExpiredTokenRefreshes() async throws {
+        let storage = MemoryAuthStorage()
+        _ = try await repository(storage: storage).signIn(email: "wallet@example.com", password: "sandbox-password")
+        let relaunched = repository(storage: storage)
+        let restored = try await relaunched.getCurrentUser()
+        XCTAssertEqual(restored?.role, .beneficiary)
+        storage.expireSessions()
+        let refreshed = try await repository(storage: storage).getCurrentUser()
+        XCTAssertEqual(refreshed?.id, restored?.id)
+    }
+
+    func testLogoutRemovesPersistedSession() async throws {
+        let storage = MemoryAuthStorage()
+        let repo = repository(storage: storage)
+        _ = try await repo.signIn(email: "wallet@example.com", password: "sandbox-password")
+        try await repo.signOut()
+        let restored = try await repository(storage: storage).getCurrentUser()
+        XCTAssertNil(restored)
+    }
+
+    func testRecoveryCallbackAndPasswordUpdate() async throws {
+        let repo = repository(storage: MemoryAuthStorage())
+        try await repo.resetPassword(email: "wallet@example.com")
+        try await repo.handleAuthCallback(URL(string: "monederito://auth/recovery?code=fixture")!)
+        try await repo.updatePassword("new-sandbox-password")
+    }
+
 }
 
 private struct EmptyAuthStorage: AuthLocalStorage {
@@ -74,6 +101,10 @@ private final class AuthFixtureProtocol: URLProtocol {
             payload = """
             {"id":"11111111-1111-1111-1111-111111111111","full_name":"Persisted Name","email":"wallet@example.com","role":"beneficiary"}
             """
+        } else if path == "/auth/v1/recover" || path == "/auth/v1/logout" {
+            payload = "{}"
+        } else if path == "/auth/v1/user", request.httpMethod == "PUT" {
+            payload = authUser
         } else {
             // Reject unexpected requests, including profile writes on login/confirmation.
             client?.urlProtocol(self, didFailWithError: URLError(.unsupportedURL))
@@ -85,4 +116,29 @@ private final class AuthFixtureProtocol: URLProtocol {
         client?.urlProtocolDidFinishLoading(self)
     }
     override func stopLoading() {}
+}
+
+private final class MemoryAuthStorage: AuthLocalStorage, @unchecked Sendable {
+    private let lock = NSLock()
+    private var values: [String: Data] = [:]
+    func store(key: String, value: Data) throws {
+        lock.lock(); defer { lock.unlock() }
+        values[key] = value
+    }
+    func retrieve(key: String) throws -> Data? {
+        lock.lock(); defer { lock.unlock() }
+        return values[key]
+    }
+    func remove(key: String) throws {
+        lock.lock(); defer { lock.unlock() }
+        values.removeValue(forKey: key)
+    }
+    func expireSessions() {
+        lock.lock(); defer { lock.unlock() }
+        for (key, data) in values {
+            guard var session = try? JSONSerialization.jsonObject(with: data) as? [String: Any], session["expires_at"] != nil else { continue }
+            session["expires_at"] = 0
+            values[key] = try? JSONSerialization.data(withJSONObject: session)
+        }
+    }
 }

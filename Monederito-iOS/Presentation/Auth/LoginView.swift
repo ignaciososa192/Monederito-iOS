@@ -13,6 +13,7 @@ struct LoginView: View {
     @Environment(DependencyContainer.self) private var container
     
     @State private var viewModel = AuthViewModel()
+    @State private var showRecovery = false
     @State private var showRegister: Bool = false
     @State private var showOnboarding: Bool = false
     @State private var showGoogleRolePicker: Bool = false
@@ -56,6 +57,7 @@ struct LoginView: View {
         .fullScreenCover(isPresented: $showOnboarding) {
             OnboardingView(showOnboarding: $showOnboarding)
         }
+        .sheet(isPresented: $showRecovery) { PasswordRecoveryView(isUpdatingPassword: false) }
         .sheet(isPresented: $showRegister) {
             RegisterView()
         }
@@ -137,6 +139,9 @@ struct LoginView: View {
             .submitLabel(.done)
             .onSubmit { focusedField = nil }
             
+            if let error = appState.error {
+                Text(error.localizedDescription).font(.caption).foregroundStyle(Color.riskRed)
+            }
             // Error message
             if let error = viewModel.errorMessage {
                 HStack(spacing: 8) {
@@ -154,7 +159,7 @@ struct LoginView: View {
             HStack {
                 Spacer()
                 Button("¿Olvidaste tu contraseña?") {
-                    // Paso 13: implementar reset
+                    showRecovery = true
                 }
                 .font(.caption)
                 .foregroundColor(Color.monederitoOrange)
@@ -230,6 +235,7 @@ struct LoginView: View {
             
             // Dev buttons — SOLO para desarrollo
             #if DEBUG
+            if AppConfiguration.current?.environment == .mock {
             VStack(spacing: 8) {
                 Text("Acceso rápido (DEBUG)")
                     .font(.caption2)
@@ -257,6 +263,7 @@ struct LoginView: View {
                 }
             }
             .padding(.top, 8)
+            }
             #endif
         }
     }

@@ -21,6 +21,8 @@ enum SignUpResult {
     case confirmationRequired(email: String)
 }
 
+enum AuthSessionEvent { case signedOut, passwordRecovery }
+
 protocol AuthRepositoryProtocol: AnyObject {
     
     // CONCEPTO: async throws
@@ -40,6 +42,16 @@ protocol AuthRepositoryProtocol: AnyObject {
     func signOut() async throws
     func getCurrentUser() async throws -> User?
     func resetPassword(email: String) async throws
+    func updatePassword(_ password: String) async throws
+    func handleAuthCallback(_ url: URL) async throws
+    func sessionEvents() -> AsyncStream<AuthSessionEvent>
     func updateProfile(_ user: User) async throws -> User
     func enableBiometrics() async throws
+}
+
+// Non-network test doubles may opt out of callbacks/events.
+extension AuthRepositoryProtocol {
+    func updatePassword(_ password: String) async throws { throw AppError.authenticationFailed }
+    func handleAuthCallback(_ url: URL) async throws { throw AppError.authenticationFailed }
+    func sessionEvents() -> AsyncStream<AuthSessionEvent> { AsyncStream { $0.finish() } }
 }

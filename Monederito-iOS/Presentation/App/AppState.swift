@@ -7,10 +7,14 @@
 
 import SwiftUI
 
+@MainActor
 @Observable
 class AppState {
     
     // MARK: - Session State
+    var isRestoringSession = true
+    var requiresPasswordUpdate = false
+    private var sessionRevision = 0
     var currentUser: User? = nil
     var isAuthenticated: Bool = false
     var isLoading: Bool = false
@@ -53,14 +57,53 @@ class AppState {
         isLoading = false
     }
     
+    func restoreSession(using repository: any AuthRepositoryProtocol) async {
+        let revision = sessionRevision
+        defer { isRestoringSession = false }
+        do {
+            let user = try await repository.getCurrentUser()
+            guard revision == sessionRevision else { return }
+            currentUser = user
+            isAuthenticated = user != nil && !requiresPasswordUpdate
+            error = nil
+        } catch {
+            guard revision == sessionRevision else { return }
+            self.error = (error as? AppError) ?? .serverError(code: 0, message: error.localizedDescription)
+        }
+    }
+
     func signOut(using repository: any AuthRepositoryProtocol) async {
+        signOut()
         do {
             try await repository.signOut()
-        } catch { }
-        currentUser = nil
-        isAuthenticated = false
+        } catch {
+            self.error = (error as? AppError) ?? .serverError(code: 0, message: error.localizedDescription)
+        }
     }
-    
+
+    func observeSession(using repository: any AuthRepositoryProtocol) async {
+        for await event in repository.sessionEvents() {
+            switch event {
+            case .signedOut: signOut()
+            case .passwordRecovery:
+                requiresPasswordUpdate = true
+                isAuthenticated = false
+            }
+        }
+    }
+
+    func handleAuthCallback(_ url: URL, using repository: any AuthRepositoryProtocol) async {
+        isRestoringSession = true
+        do {
+            try await repository.handleAuthCallback(url)
+            if url.path == "/recovery" { requiresPasswordUpdate = true }
+            await restoreSession(using: repository)
+        } catch {
+            isRestoringSession = false
+            self.error = (error as? AppError) ?? .serverError(code: 0, message: "El enlace expiró o no es válido. Solicitá uno nuevo.")
+        }
+    }
+
     // MARK: - Quick login para desarrollo (lo eliminamos en Paso 7)
     func loginAsBenefactor() {
         currentUser = MockData.benefactorUser
@@ -73,6 +116,12 @@ class AppState {
     }
     
     func signOut() {
+        sessionRevision += 1
+        requiresPasswordUpdate = false
+        selectedBenefactorTab = .dashboard
+        selectedBeneficiaryTab = .wallet
+        pendingAlertID = nil
+        pendingOperation = nil
         currentUser = nil
         isAuthenticated = false
     }

@@ -25,7 +25,11 @@ struct RootView: View {
         // no CÓMO transicionar. El framework maneja las animaciones.
         
         Group {
-            if showOnboarding {
+            if appState.isRestoringSession {
+                ProgressView("Recuperando sesión…")
+            } else if appState.requiresPasswordUpdate {
+                PasswordRecoveryView(isUpdatingPassword: true)
+            } else if showOnboarding {
                 OnboardingView(showOnboarding: $showOnboarding)
                     .onChange(of: showOnboarding) { _, newValue in
                         if !newValue {

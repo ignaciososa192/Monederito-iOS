@@ -36,6 +36,7 @@ struct MonederitoApp: App {
     // CONCEPTO: @State en el App struct
     // AppState vive aquí — es el nivel más alto de la app.
     // Al inyectarlo con .environment(), todas las Views hijas pueden accederlo.
+    @Environment(\.scenePhase) private var scenePhase
     @State private var appState = AppState()
     @State private var notificationManager = NotificationManager.shared
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
@@ -51,10 +52,6 @@ struct MonederitoApp: App {
         UNUserNotificationCenter.current().delegate = notificationDelegate
         NotificationManager.shared.setup()
         
-        // Restore Google session on app launch
-        if AppConfiguration.current?.environment == .sandbox {
-            Task { await Self.restoreGoogleSession() }
-        }
     }
     
     var body: some Scene {
@@ -75,17 +72,28 @@ struct MonederitoApp: App {
             // CONCEPTO: onAppear para pedir permisos al iniciar
                 .task {
                     guard AppConfiguration.startupError == nil else { return }
+                    await appState.restoreSession(using: container.authRepository)
                     notificationDelegate.appState = appState
                     if !notificationManager.isAuthorized {
                         await notificationManager.requestAuthorization()
                     }
                     notificationManager.clearBadge()
                 }
+                .task { await appState.observeSession(using: container.authRepository) }
+                .onChange(of: scenePhase) { _, phase in
+                    if phase == .active, AppConfiguration.startupError == nil {
+                        Task { await appState.restoreSession(using: container.authRepository) }
+                    }
+                }
                 .onChange(of: notificationManager.pendingDeepLink) { _, deepLink in
                     handleDeepLink(deepLink)
                 }
             // In your root view
             .onOpenURL { url in
+                if url.scheme == "monederito", url.host == "auth", ["/callback", "/recovery"].contains(url.path) {
+                    Task { await appState.handleAuthCallback(url, using: container.authRepository) }
+                    return
+                }
                 // Handle Google Sign-In callbacks
                 if AppConfiguration.current?.environment == .sandbox,
                    GIDSignIn.sharedInstance.handle(url) { return }
@@ -93,14 +101,6 @@ struct MonederitoApp: App {
                 // Handle deep links for notifications
                 handleIncomingURL(url)
             }
-        }
-    }
-    
-    private static func restoreGoogleSession() async {
-        // Intenta recuperar al usuario silenciosamente
-        if let googleResult = await GoogleSignInManager.shared.restorePreviousSignIn() {
-            print("Sesión de Google restaurada para: \(googleResult.email)")
-            // TODO: If you want to auto-login with restored session, call authRepository.signInWithGoogle()
         }
     }
     
