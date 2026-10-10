@@ -20,7 +20,7 @@ final class FirebaseConfigurationTests: XCTestCase {
     }
 
     func testIncompleteFirebaseConfigurationIsRejectedBeforeSDKInitialization() {
-        for key in valid.keys {
+        for key in ["GOOGLE_APP_ID", "GCM_SENDER_ID", "API_KEY", "PROJECT_ID", "BUNDLE_ID"] {
             var incomplete = valid
             incomplete.removeValue(forKey: key)
             XCTAssertThrowsError(try FirebaseConfigurationValidator.validate(incomplete, bundleID: bundleID, googleClientID: clientID), key)
@@ -28,5 +28,11 @@ final class FirebaseConfigurationTests: XCTestCase {
         var wrongPlatform = valid
         wrongPlatform["GOOGLE_APP_ID"] = "1:123:android:example"
         XCTAssertThrowsError(try FirebaseConfigurationValidator.validate(wrongPlatform, bundleID: bundleID, googleClientID: clientID))
+    }
+
+    func testFirebasePlistWithoutOAuthClientUsesIndependentGoogleConfiguration() throws {
+        var withoutOAuth = valid
+        withoutOAuth.removeValue(forKey: "CLIENT_ID")
+        try FirebaseConfigurationValidator.validate(withoutOAuth, bundleID: bundleID, googleClientID: clientID)
     }
 }

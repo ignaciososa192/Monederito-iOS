@@ -10,7 +10,7 @@
 
 Mock no necesita credenciales ni inicialización de Firebase. El target compartido conserva el enlace a los cuatro SDK utilizados y SwiftPM los resuelve al compilar; esto no significa un build sin descarga de dependencias. El test hosted existente comprueba `FirebaseApp.app() == nil` en Mock.
 
-Sandbox valida campos obligatorios, plataforma iOS, bundle ID y client ID antes de `FirebaseApp.configure()`. Un plist de otra app muestra el error de configuración. `GoogleService-Info.plist` y `Config/Sandbox.local.xcconfig` siguen ignorados; copiarlos desde el checkout local al checkout W03 para una prueba Sandbox, sin commitearlos.
+Sandbox valida campos obligatorios, plataforma iOS, bundle ID y client ID cuando el plist lo incluye, antes de `FirebaseApp.configure()`. Un plist de otra app muestra el error de configuración. `GoogleService-Info.plist` y `Config/Sandbox.local.xcconfig` siguen ignorados; copiarlos desde el checkout local al checkout W03 para una prueba Sandbox, sin commitearlos.
 
 El entitlement App Attest `production` sólo se aplica a Sandbox. Registrar la app y App Attest en Firebase y habilitar la capability para su App ID/provisioning en Apple Developer antes de Archive de dispositivo. Release no usa el proveedor Debug, tampoco en simulador: la atestación real necesita un dispositivo compatible. No se habilita enforcement remoto como parte de este PR. Obtener un token App Check no protege por sí solo las llamadas a Supabase; Auth/RLS y sus contratos siguen siendo la protección del backend. No se agrega Firebase como fuente de datos de la wallet.
 
@@ -36,6 +36,8 @@ Referencias oficiales: [Debug provider](https://firebase.google.com/docs/app-che
 
 - Parse Swift y plutil de proyecto/Info/entitlements: correctos.
 - diff --check y Package.resolved sin cambios: correctos.
-- Tests nuevos rechazan plist incompleto, de otro bundle/client y de plataforma Android.
+- Tests nuevos rechazan plist incompleto, de otro bundle/client y de plataforma Android; aceptan plist Firebase sin OAuth client cuando GoogleSignIn usa el xcconfig independiente.
 - CI local intentado con Scripts/ci-ios.sh; el entorno del agente no conecta a CoreSimulator. CI GitHub pendiente hasta ver resultado del PR.
-- Recepción en Crashlytics, registro de Debug token y atestación de dispositivo: pendientes de recorrido y evidencia en consola. No dar W03 por cerrado únicamente por compilar.
+- Validador compilado y probado contra el plist/xcconfig reales del checkout: correcto, sin imprimir credenciales.
+- Consola inspeccionada: proyecto coincidente, Crashlytics detecta la app y espera un crash; App Check indica Sin registrar. El usuario pidió dejar el registro remoto pendiente; no se guardaron cambios ni se habilitó enforcement.
+- Recepción en Crashlytics, registro de App Attest/Debug token y atestación de dispositivo: pendientes de recorrido y evidencia en consola. DeviceCheck como fallback también necesita su registro y clave Apple en Firebase. No dar W03 por cerrado únicamente por compilar.

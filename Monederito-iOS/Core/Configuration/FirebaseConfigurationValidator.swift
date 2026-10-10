@@ -17,9 +17,15 @@ enum FirebaseConfigurationValidator {
             }
         }
         guard info["BUNDLE_ID"] as? String == bundleID,
-              info["CLIENT_ID"] as? String == googleClientID,
               (info["GOOGLE_APP_ID"] as? String)?.contains(":ios:") == true else {
             throw ValidationError.invalidConfiguration
+        }
+        // Firebase plists can omit OAuth IDs when Firebase Auth/Google is not configured.
+        // GoogleSignIn is configured independently from Sandbox.local.xcconfig.
+        if let clientID = info["CLIENT_ID"] {
+            guard clientID as? String == googleClientID else {
+                throw ValidationError.invalidConfiguration
+            }
         }
     }
 }
