@@ -99,7 +99,7 @@ private final class AuthFixtureProtocol: URLProtocol {
             payload = "{\"access_token\":\"fixture\",\"token_type\":\"bearer\",\"expires_in\":3600,\"expires_at\":\(expiresAt),\"refresh_token\":\"fixture\",\"user\":\(authUser)}"
         } else if path == "/rest/v1/profiles", request.httpMethod == "GET" {
             payload = """
-            {"id":"11111111-1111-1111-1111-111111111111","full_name":"Persisted Name","email":"wallet@example.com","role":"beneficiary"}
+            [{"id":"11111111-1111-1111-1111-111111111111","full_name":"Persisted Name","email":"wallet@example.com","role":"beneficiary"}]
             """
         } else if path == "/auth/v1/recover" || path == "/auth/v1/logout" {
             payload = "{}"

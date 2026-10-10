@@ -29,7 +29,7 @@ final class SupabaseAuthRepository: AuthRepositoryProtocol {
                 email: email,
                 password: password
             )
-            return try await fetchOrCreateProfile(for: session.user)
+            return try await fetchProfile(for: session.user)
         } catch {
             throw mapSupabaseError(error)
         }
@@ -55,13 +55,7 @@ final class SupabaseAuthRepository: AuthRepositoryProtocol {
                 )
             )
 
-            // Paso 3: Buscar o crear perfil en nuestra tabla
-            return try await fetchOrCreateProfile(
-                for: session.user,
-                fullName: googleResult.fullName,
-                email: googleResult.email,
-                role: role ?? .benefactor
-            )
+            return try await fetchProfile(for: session.user)
         } catch {
             throw mapSupabaseError(error)
         }
@@ -89,13 +83,7 @@ final class SupabaseAuthRepository: AuthRepositoryProtocol {
             
             // El trigger de Supabase crea el perfil automáticamente
             // Usamos retry logic con exponential backoff para esperar el trigger
-            return .authenticated(try await fetchOrCreateProfileWithRetry(
-                for: authUser,
-                fullName: fullName,
-                email: email,
-                role: role,
-                phone: phone
-            ))
+            return .authenticated(try await fetchProfileWithRetry(for: authUser))
         } catch let error as AppError {
             throw error
         } catch {
@@ -113,7 +101,7 @@ final class SupabaseAuthRepository: AuthRepositoryProtocol {
     func getCurrentUser() async throws -> User? {
         do {
             let session = try await client.auth.session
-            return try await fetchOrCreateProfile(for: session.user)
+            return try await fetchProfile(for: session.user)
         } catch AuthError.sessionMissing {
             return nil
         } catch AuthError.api(_, let code, _, _) where code == .refreshTokenNotFound || code == .refreshTokenAlreadyUsed {
@@ -181,129 +169,34 @@ final class SupabaseAuthRepository: AuthRepositoryProtocol {
     
     // MARK: - Helpers privados
     
-    // Busca el perfil en la tabla profiles con retry logic.
-    // Si no existe (primer login con Google), lo crea usando upsert para evitar race conditions.
-    private func fetchOrCreateProfileWithRetry(
-        for authUser: Supabase.User,
-        fullName: String? = nil,
-        email: String? = nil,
-        role: UserRole = .benefactor,
-        phone: String? = nil,
-        maxRetries: Int = 5
-    ) async throws -> User {
-        
-        for attempt in 0..<maxRetries {
-            // Intentar buscar el perfil existente
-            let response = try? await client
-                .from(SupabaseConfig.Tables.profiles)
-                .select()
-                .eq("id", value: authUser.id.uuidString)
-                .single()
-                .execute()
-
-            // Si existe, mapearlo
-            if let data = response?.data,
-               let profile = try? JSONDecoder().decode(SupabaseProfile.self, from: data) {
-
-                return profile.toUser()
-            }
-            
-            // Si no existe y no es el último intento, esperar
-            if attempt < maxRetries - 1 {
-                let delay = UInt64(pow(2.0, Double(attempt))) * 100_000_000 // Exponential backoff: 100ms, 200ms, 400ms, 800ms, 1.6s
-                try await Task.sleep(nanoseconds: delay)
+    // The existing auth.users trigger owns profile creation, including Google users.
+    // Retry only a missing row; propagate network/decoding/permission errors unchanged.
+    private func fetchProfileWithRetry(for authUser: Supabase.User) async throws -> User {
+        for attempt in 0..<5 {
+            do {
+                return try await fetchProfile(for: authUser)
+            } catch AppError.profileCreationFailed where attempt < 4 {
+                try await Task.sleep(nanoseconds: UInt64(1 << attempt) * 100_000_000)
             }
         }
-
-        // Si después de los reintentos no existe, crear el perfil usando upsert
-        let newProfile = SupabaseProfile(
-            id: authUser.id.uuidString,
-            fullName: fullName ?? authUser.email?.components(separatedBy: "@").first ?? "Usuario",
-            email: email ?? authUser.email ?? "",
-            role: role.rawValue,
-            phone: phone,
-            benefactorId: nil,
-            monthlyLimit: nil,
-            dailyLimit: nil
-        )
-
-        do {
-            try await client
-                .from(SupabaseConfig.Tables.profiles)
-                .upsert(newProfile, onConflict: "id", ignoreDuplicates: true)
-                .execute()
-        } catch {
-            // Si upsert falla, podría ser que el perfil fue creado por otro request
-            // Intentar leerlo una última vez
-            if let profile = try? await fetchExistingProfile(for: authUser) {
-                return profile
-            }
-            throw AppError.profileCreationFailed
-        }
-
-        return try await fetchExistingProfile(for: authUser)
+        throw AppError.profileCreationFailed
     }
-    
-    // Helper para buscar perfil existente sin retry
-    private func fetchExistingProfile(for authUser: Supabase.User) async throws -> User {
+
+    private func fetchProfile(for authUser: Supabase.User) async throws -> User {
         let response = try await client
             .from(SupabaseConfig.Tables.profiles)
             .select()
             .eq("id", value: authUser.id.uuidString)
-            .single()
             .execute()
-        
-        let profile = try JSONDecoder().decode(SupabaseProfile.self, from: response.data)
-        
+        let profiles = try JSONDecoder().decode([SupabaseProfile].self, from: response.data)
+        guard profiles.count == 1, let profile = profiles.first else { throw AppError.profileCreationFailed }
         return profile.toUser()
     }
-    
-    // Versión simple sin retry para Google Sign-In (donde no hay trigger)
-    private func fetchOrCreateProfile(
-        for authUser: Supabase.User,
-        fullName: String? = nil,
-        email: String? = nil,
-        role: UserRole = .benefactor,
-        phone: String? = nil
-    ) async throws -> User {
 
-        // Intentar buscar el perfil existente
-        let response = try? await client
-            .from(SupabaseConfig.Tables.profiles)
-            .select()
-            .eq("id", value: authUser.id.uuidString)
-            .single()
-            .execute()
-
-        // Si existe, mapearlo
-        if let data = response?.data,
-           let profile = try? JSONDecoder().decode(SupabaseProfile.self, from: data) {
-
-            return profile.toUser()
-        }
-
-        // Si no existe, crear el perfil usando upsert para evitar race conditions
-        let newProfile = SupabaseProfile(
-            id: authUser.id.uuidString,
-            fullName: fullName ?? authUser.email?.components(separatedBy: "@").first ?? "Usuario",
-            email: email ?? authUser.email ?? "",
-            role: role.rawValue,
-            phone: phone,
-            benefactorId: nil,
-            monthlyLimit: nil,
-            dailyLimit: nil
-        )
-
-        try await client
-            .from(SupabaseConfig.Tables.profiles)
-            .upsert(newProfile, onConflict: "id", ignoreDuplicates: true)
-            .execute()
-
-        return try await fetchExistingProfile(for: authUser)
-    }
-    
     // Mapear errores de Supabase a AppError
     private func mapSupabaseError(_ error: Error) -> AppError {
+        if let error = error as? AppError { return error }
+        if error is URLError { return .networkUnavailable }
         let message = error.localizedDescription.lowercased()
         if message.contains("invalid") || message.contains("credentials") {
             return .invalidCredentials

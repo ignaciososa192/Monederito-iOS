@@ -2,7 +2,7 @@
 
 ## Cambios
 
-El registro distingue usuario autenticado de confirmación de correo pendiente. Login por correo/Google y restauración conservan el rol guardado; los upserts ignoran duplicados y recuperan el perfil persistido.
+El registro distingue usuario autenticado de confirmación de correo pendiente. Login por correo/Google y restauración conservan el rol guardado; la creación del perfil queda a cargo del trigger existente en auth.users. La app sólo lee perfiles al autenticar y no intenta crearlos por errores de lectura.
 
 La app restaura Supabase al arrancar y volver a foreground. El SDK renueva tokens expirados; un refresh token inexistente/reutilizado elimina la sesión. Los errores de red/perfil se muestran, sin convertirlos silenciosamente en ausencia de sesión. El evento signedOut limpia usuario y rutas; una restauración tardía no puede deshacer logout.
 
