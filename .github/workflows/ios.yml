@@ -22,10 +22,8 @@ jobs:
         run: xcodebuild -version
       - name: Build and test without private service configuration
         run: |
-          status=0
-          bash Scripts/ci-ios.sh > .ci-build.log 2>&1 || status=$?
-          tail -n 120 .ci-build.log
-          exit "$status"
+          set -o pipefail
+          bash Scripts/ci-ios.sh 2>&1 | tee .ci-build.log
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4

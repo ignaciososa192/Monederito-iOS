@@ -1,26 +1,17 @@
-//
-//  MonederitoAppCheckFactory.swift
-//  Monederito-iOS
-//
-//  Created by Ignacio Sosa on 01/08/2026.
-//
-
-import Foundation
+import DeviceCheck
 import FirebaseCore
 import FirebaseAppCheck
 
-class MonederitoAppCheckFactory: NSObject, AppCheckProviderFactory {
+/// Release uses device attestation. The Debug factory is installed before Firebase configure.
+final class MonederitoAppCheckFactory: NSObject, AppCheckProviderFactory {
     func createProvider(with app: FirebaseApp) -> AppCheckProvider? {
-        #if DEBUG
-        // Use DeviceCheckProvider for debug builds (works in simulator)
-        return DeviceCheckProvider(app: app)
-        #else
-        // Use AppAttestProvider for release builds (requires Apple Developer account)
-        if #available(iOS 14.0, *) {
+        if DCAppAttestService.shared.isSupported {
             return AppAttestProvider(app: app)
-        } else {
+        }
+        if DCDevice.current.isSupported {
             return DeviceCheckProvider(app: app)
         }
-        #endif
+        // A Release simulator cannot attest; never silently use a Debug token.
+        return nil
     }
 }
