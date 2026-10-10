@@ -51,10 +51,20 @@ struct AppConfiguration {
     }
 
     private static let startup: Result<AppConfiguration, Error> = Result {
-        try AppConfiguration(
+        let configuration = try AppConfiguration(
             info: Bundle.main.infoDictionary ?? [:],
             hasFirebaseConfiguration: Bundle.main.url(forResource: "GoogleService-Info", withExtension: "plist") != nil
         )
+        if configuration.environment == .sandbox {
+            guard let url = Bundle.main.url(forResource: "GoogleService-Info", withExtension: "plist"),
+                  let data = try? Data(contentsOf: url),
+                  let info = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any] else {
+                throw FirebaseConfigurationValidator.ValidationError.invalidConfiguration
+            }
+            try FirebaseConfigurationValidator.validate(info, bundleID: Bundle.main.bundleIdentifier ?? "",
+                                                        googleClientID: configuration.googleClientID)
+        }
+        return configuration
     }
 
     static var current: AppConfiguration? { try? startup.get() }

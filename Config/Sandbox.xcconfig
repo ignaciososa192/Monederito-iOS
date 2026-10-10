@@ -4,3 +4,8 @@ MONEDERITO_ENVIRONMENT = sandbox
 // Symbol upload inputs are required only for sandbox device builds.
 CRASHLYTICS_INPUT_FILE_LIST = $(SRCROOT)/Config/mock-crashlytics.xcfilelist
 CRASHLYTICS_INPUT_FILE_LIST[sdk=iphoneos*] = $(SRCROOT)/Config/sandbox-crashlytics.xcfilelist
+
+// Device attestation belongs only to the Sandbox app.
+CODE_SIGN_ENTITLEMENTS = $(SRCROOT)/Config/Sandbox.entitlements
+DEBUG_INFORMATION_FORMAT = dwarf-with-dsym
+ENABLE_DEBUG_DYLIB = NO

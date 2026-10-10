@@ -16,12 +16,18 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         guard AppConfiguration.current?.environment == .sandbox else { return true }
 
+        #if DEBUG
+        let providerFactory = AppCheckDebugProviderFactory()
+        #else
         let providerFactory = MonederitoAppCheckFactory()
+        #endif
         AppCheck.setAppCheckProviderFactory(providerFactory)
         FirebaseApp.configure()
         // Initialize Crashlytics
         let crashlytics = Crashlytics.crashlytics()
         crashlytics.setCrashlyticsCollectionEnabled(true)
+        crashlytics.setCustomValue("sandbox", forKey: "environment")
+        FirebaseDiagnostics.runIfRequested()
         
         // Configure Google Sign-In
         GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: SupabaseConfig.googleClientID)
