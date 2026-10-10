@@ -12,7 +12,7 @@ Mock no necesita credenciales ni inicialización de Firebase. El target comparti
 
 Sandbox valida campos obligatorios, plataforma iOS, bundle ID y client ID antes de `FirebaseApp.configure()`. Un plist de otra app muestra el error de configuración. `GoogleService-Info.plist` y `Config/Sandbox.local.xcconfig` siguen ignorados; copiarlos desde el checkout local al checkout W03 para una prueba Sandbox, sin commitearlos.
 
-El entitlement App Attest `production` sólo se aplica a Sandbox. Registrar la app y App Attest en Firebase y habilitar la capability para su App ID/provisioning en Apple Developer antes de Archive de dispositivo. Release no usa el proveedor Debug, tampoco en simulador: la atestación real necesita un dispositivo compatible. No se habilita enforcement remoto como parte de este PR.
+El entitlement App Attest `production` sólo se aplica a Sandbox. Registrar la app y App Attest en Firebase y habilitar la capability para su App ID/provisioning en Apple Developer antes de Archive de dispositivo. Release no usa el proveedor Debug, tampoco en simulador: la atestación real necesita un dispositivo compatible. No se habilita enforcement remoto como parte de este PR. Obtener un token App Check no protege por sí solo las llamadas a Supabase; Auth/RLS y sus contratos siguen siendo la protección del backend. No se agrega Firebase como fuente de datos de la wallet.
 
 La recolección Crashlytics parte deshabilitada en Info.plist y se habilita después de inicializar Sandbox. Sandbox genera dSYM y desactiva el debug dylib para que los inputs existentes cubran el binario. El script de símbolos sólo corre en Archive Sandbox, con la ruta SwiftPM documentada. Un build de simulador no demuestra la subida de símbolos.
 
