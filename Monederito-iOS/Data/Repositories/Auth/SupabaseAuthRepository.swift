@@ -11,12 +11,18 @@ import Supabase
 final class SupabaseAuthRepository: AuthRepositoryProtocol {
 
     private let client: SupabaseClient
+    private let googleSignIn: @MainActor () async throws -> GoogleSignInResult
     private let securityService: SecurityServiceProtocol
     
-    init(client: SupabaseClient? = SupabaseConfig.client, securityService: SecurityServiceProtocol = SecurityService()) {
+    init(
+        client: SupabaseClient? = SupabaseConfig.client,
+        securityService: SecurityServiceProtocol = SecurityService(),
+        googleSignIn: @escaping @MainActor () async throws -> GoogleSignInResult = { try await GoogleSignInManager.shared.signInWithGoogle() }
+    ) {
         guard let client else {
             fatalError("Supabase is not configured. Check SupabaseConfig.swift")
         }
+        self.googleSignIn = googleSignIn
         self.client = client
         self.securityService = securityService
     }
@@ -43,7 +49,7 @@ final class SupabaseAuthRepository: AuthRepositoryProtocol {
     // 4. Nosotros buscamos o creamos el perfil en nuestra tabla profiles
     func signInWithGoogle(role: UserRole? = nil) async throws -> User {
         // Paso 1: Login con Google
-        let googleResult = try await GoogleSignInManager.shared.signInWithGoogle()
+        let googleResult = try await googleSignIn()
 
         // Paso 2: Autenticar en Supabase con el idToken de Google
         do {

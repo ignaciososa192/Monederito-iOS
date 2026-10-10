@@ -15,7 +15,9 @@ final class SupabaseRegistrationTests: XCTestCase {
                 global: .init(session: URLSession(configuration: config))
             )
         )
-        return SupabaseAuthRepository(client: client)
+        return SupabaseAuthRepository(client: client, googleSignIn: {
+            GoogleSignInResult(fullName: "Google Name", email: "wallet@example.com", idToken: "fixture", accessToken: "fixture")
+        })
     }
 
     func testSignupWithoutSessionDoesNotAccessProfiles() async throws {
@@ -36,6 +38,12 @@ final class SupabaseRegistrationTests: XCTestCase {
         XCTAssertEqual(user.role, .beneficiary)
         XCTAssertEqual(user.fullName, "Persisted Name")
     }
+    func testGoogleLoginPreservesExistingRoleDespiteSelection() async throws {
+        let user = try await repository().signInWithGoogle(role: .benefactor)
+        XCTAssertEqual(user.role, .beneficiary)
+        XCTAssertEqual(user.fullName, "Persisted Name")
+    }
+
     func testSessionRestoresWithNewClientAndExpiredTokenRefreshes() async throws {
         let storage = MemoryAuthStorage()
         _ = try await repository(storage: storage).signIn(email: "wallet@example.com", password: "sandbox-password")
